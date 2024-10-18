@@ -98,7 +98,7 @@ export type Job = {
     applicationDeadline: string
 }
 
-export const columns: ColumnDef<Job>[] = [
+const columns: ColumnDef<Job>[] = [
     {
         id: "select",
         header: ({ table }) => (
