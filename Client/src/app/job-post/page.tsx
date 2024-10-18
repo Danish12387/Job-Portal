@@ -112,7 +112,7 @@ export default function JobPostingForm() {
         errorHandler(name, value);
     }
 
-    const selectValueChange = (e: ChangeEvent<HTMLInputElement>, type: 'jobCategory' | 'jobType') => {
+    const selectValueChange = (e: string, type: 'jobCategory' | 'jobType') => {
         setSelectValue({
             ...selectValue, [type]: e
         });
