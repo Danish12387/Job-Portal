@@ -2,9 +2,9 @@
 
 import React, { ReactNode } from 'react';
 import { useAppSelector } from '@/lib/hooks';
-import Loader from './Loader/loader';
+import Loader from './Loader/Loader';
 import useCheckAuth from '@/hooks/useCheckAuth';
-import useGetAllJobs from '@/hooks/usegetAllJobs';
+import useGetAllJobs from '@/hooks/useGetAllJobs';
 
 interface AuthCheckProps {
     children: ReactNode;
