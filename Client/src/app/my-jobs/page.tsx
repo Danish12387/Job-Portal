@@ -266,7 +266,8 @@ export default function JobListingsDataTable() {
                                         data-state={row.getIsSelected() && "selected"}
                                     >
                                         {row.getVisibleCells().map((cell) => (
-                                            <TableCell key={cell.id} className={`${flexRender(cell.column.columnDef.cell, cell.getContext())?.props?.column?.id === 'postedDate' ? "pl-10" : ""}`}>
+                                            // className={`${flexRender(cell.column.columnDef.cell, cell.getContext())?.props?.column?.id === 'postedDate' ? "pl-10" : ""}`}
+                                            <TableCell key={cell.id}>
                                                 {flexRender(cell.column.columnDef.cell, cell.getContext())}
                                             </TableCell>
                                         ))}
