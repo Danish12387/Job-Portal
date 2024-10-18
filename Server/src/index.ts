@@ -5,6 +5,7 @@ import connectDB from "./config/db";
 import bodyParser from "body-parser";
 import cookieParser from "cookie-parser";
 import userRoutes from "./routes/user.route";
+import jobRoutes from "./routes/job.route";
 
 dotenv.config();
 
@@ -16,7 +17,7 @@ app.use(express.urlencoded({ extended: true, limit: '10mb' }));
 app.use(express.json());
 app.use(cookieParser());
 const corsOptions = {
-    origin: "http://localhost:3000",
+    origin: ["http://localhost:3000", "http://localhost:5173"],
     credentials: true
 }
 app.use(cors(corsOptions));
@@ -27,7 +28,8 @@ app.get('/', (req, res) => {
     })
 })
 
-app.use("/api/v1/user", userRoutes)
+app.use("/api/v1/user", userRoutes);
+app.use("/api/v1/job", jobRoutes);
 
 app.listen(PORT, () => {
     connectDB();
