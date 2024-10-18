@@ -32,7 +32,7 @@ export function middleware(request: NextRequest) {
             const decodedToken = jwt.decode(token) as jwt.JwtPayload;
             const currentTime = Math.floor(Date.now() / 1000);
 
-            if (!decodedToken || decodedToken.exp < currentTime) {
+            if (!decodedToken || typeof decodedToken.exp === 'undefined' || decodedToken.exp < currentTime) {
                 const response = NextResponse.redirect(new URL('/login', request.url));
                 response.cookies.delete('token');
                 return response;
