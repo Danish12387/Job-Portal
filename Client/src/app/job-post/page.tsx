@@ -9,7 +9,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Textarea } from "@/components/ui/textarea"
 import { jobPostSchema, jobPostSchemaType, jobPostSelectSchema, jobPostSelectSchemaType } from "@/schema/jobSchema"
 import { createJob } from "@/utils/apiHandlers"
-import { ChangeEvent, useEffect, useState } from "react";
+import { ChangeEvent, FormEvent, useEffect, useState } from "react";
 import { useRouter } from 'next/navigation';
 
 export default function JobPostingForm() {
@@ -32,7 +32,7 @@ export default function JobPostingForm() {
     const [errors, setErrors] = useState<Partial<jobPostSchemaType>>({});
     const [selectErrors, setSelectErrors] = useState<Partial<jobPostSelectSchemaType>>({});
     const [date, setDate] = useState<Date>();
-    const [value, setValue] = useState("");
+    const [value, setValue] = useState<string | undefined>("");
     const router = useRouter();
 
     useEffect(() => {
@@ -104,7 +104,7 @@ export default function JobPostingForm() {
         });
     }
 
-    const changeEventHandler = (e: ChangeEvent<HTMLInputElement>) => {
+    const changeEventHandler = (e: ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
         const { name, value } = e.target;
         setInput({
             ...input, [name]: value
@@ -112,22 +112,23 @@ export default function JobPostingForm() {
         errorHandler(name, value);
     }
 
-    const selectValueChange = (e: string, type: 'jobCategory' | 'jobType') => {
+    const selectValueChange = (value: string, type: 'jobCategory' | 'jobType') => {
         setSelectValue({
-            ...selectValue, [type]: e
+            ...selectValue, [type]: value
         });
 
         setSelectErrors((prevErrors: Partial<jobPostSelectSchemaType>) => {
-            const newErros = { ...prevErrors };
+            const newErrors = { ...prevErrors };
 
-            if (type === "jobCategory" && e.includes('technology' || 'design' || 'marketing')) {
-                delete newErros.jobCategory;
-            } else if (type === "jobType" && e.includes('full-time' || 'part-time' || 'contract')) {
-                delete newErros.jobType;
+            if (type === "jobCategory" && ['technology', 'design', 'marketing'].includes(value)) {
+                delete newErrors.jobCategory;
+            } else if (type === "jobType" && ['full-time', 'part-time', 'contract'].includes(value)) {
+                delete newErrors.jobType;
             }
-            return newErros;
+
+            return newErrors;
         });
-    }
+    };
 
     const inputSubmitHandler = async (e: FormEvent) => {
         e.preventDefault();
