@@ -1,27 +1,21 @@
-'use client'
 import React, { ReactNode } from 'react';
 import Footer from './Footer';
 import MainNavbar from './MainNavbar';
-import { useAppSelector } from '@/lib/hooks';
-import Loader from './Loader/loader';
-import useCheckAuth from '@/hooks/useCheckAuth';
+import AuthCheck from './AuthCheck';
+import { Toaster } from 'react-hot-toast';
 
 interface MainLayoutProps {
     children: ReactNode;
 }
 
 const MainLayout: React.FC<MainLayoutProps> = ({ children }) => {
-    const { loading } = useAppSelector(state => state.user);
-
-    useCheckAuth();
-
-    if (loading) {
-        return <Loader />
-    }
     return (
-        <div>
+        <div className='bg-white'>
             <MainNavbar />
-            <main>{children}</main>
+            <AuthCheck>
+                <main className='pt-[75px]'>{children}</main>
+                <Toaster />
+            </AuthCheck>
             <Footer />
         </div>
     );

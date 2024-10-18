@@ -69,7 +69,7 @@ const Signup: NextPage = () => {
     }
     return (
         <MainLayout>
-            <div className='flex flex-col justify-between pt-[72px] min-h-screen'>
+            <div className='flex flex-col justify-between min-h-screen'>
                 <h1 className='text-3xl w-ful font-semibold text-center bg-gray-100 py-6'>Sign up</h1>
                 <div className='flex-1 flex items-center justify-center'>
                     <form
