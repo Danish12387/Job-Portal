@@ -1,4 +1,4 @@
-import { CombinedJobPostSchemaType } from "@/schema/jobSchema";
+import { jobPostSchemaType } from "@/schema/jobSchema";
 import { LoginInputState, SignupInputState } from "@/schema/userSchema";
 import axios from "axios";
 import toast from "react-hot-toast";
@@ -35,6 +35,10 @@ export interface Job {
     jobDescription: string;
     jobCategory: string;
     jobType: string;
+    workExperience: string;
+    salary: string;
+    requirements: string[];
+    responsibilities: string[];
     createdAt: string;
     updatedAt: string;
     __v: number;
@@ -98,7 +102,7 @@ export async function logout() {
     }
 }
 
-export async function createJob(data: CombinedJobPostSchemaType): Promise<JobResponseData | undefined> {
+export async function createJob(data: jobPostSchemaType): Promise<JobResponseData | undefined> {
     try {
         const res = await axios.post(`${API_END_POINT}/job/create-job`, data, {
             headers: {

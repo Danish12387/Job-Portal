@@ -7,10 +7,12 @@ import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Textarea } from "@/components/ui/textarea"
-import { jobPostSchema, jobPostSchemaType, jobPostSelectSchema, jobPostSelectSchemaType } from "@/schema/jobSchema"
+import { jobPostSchema, jobPostSchemaType } from "@/schema/jobSchema"
 import { createJob } from "@/utils/apiHandlers"
 import { ChangeEvent, FormEvent, useEffect, useState } from "react";
 import { useRouter } from 'next/navigation';
+import ResPointsList from "@/components/ResPointsList"
+import ReqPointsList from "@/components/ReqPointsList"
 
 export default function JobPostingForm() {
     const [input, setInput] = useState<jobPostSchemaType>({
@@ -24,15 +26,16 @@ export default function JobPostingForm() {
         qualification: '',
         applicationDeadline: '',
         jobDescription: '',
-    });
-    const [selectValue, setSelectValue] = useState<jobPostSelectSchemaType>({
         jobCategory: '',
-        jobType: ''
+        jobType: '',
+        workExperience: '',
+        salary: '',
+        requirements: [''],
+        responsibilities: [''],
     });
     const [errors, setErrors] = useState<Partial<jobPostSchemaType>>({});
-    const [selectErrors, setSelectErrors] = useState<Partial<jobPostSelectSchemaType>>({});
     const [date, setDate] = useState<Date>();
-    const [value, setValue] = useState<string | undefined>("");
+    const [value, setValue] = useState<string>("");
     const router = useRouter();
 
     useEffect(() => {
@@ -43,9 +46,9 @@ export default function JobPostingForm() {
             }));
 
             setErrors((prevErrors: Partial<jobPostSchemaType>) => {
-                const newErros = { ...prevErrors };
-                delete newErros.jobLocationCountry;
-                return newErros;
+                const newErrors = { ...prevErrors };
+                delete newErrors.jobLocationCountry;
+                return newErrors;
             })
         }
     }, [value])
@@ -72,37 +75,43 @@ export default function JobPostingForm() {
             }));
 
             setErrors((prevErrors: Partial<jobPostSchemaType>) => {
-                const newErros = { ...prevErrors };
-                delete newErros.applicationDeadline;
-                return newErros;
+                const newErrors = { ...prevErrors };
+                delete newErrors.applicationDeadline;
+                return newErrors;
             })
         }
     }, [date]);
 
-    const errorHandler = (name: string, value: string): void => {
+    const errorHandler = (name: string, value: string | string[]): void => {
         setErrors((prevErrors: Partial<jobPostSchemaType>) => {
-            const newErros = { ...prevErrors };
+            const newErrors = { ...prevErrors };
 
             if (name === "companyName" && value.length >= 1) {
-                delete newErros.companyName;
+                delete newErrors.companyName;
             } else if (name === "websiteLink" && value.length >= 1) {
-                delete newErros.websiteLink;
+                delete newErrors.websiteLink;
             } else if (name === "jobTitle" && value.length >= 1) {
-                delete newErros.jobTitle;
+                delete newErrors.jobTitle;
             } else if (name === "jobLocationCity" && value.length >= 1) {
-                delete newErros.jobLocationCity;
+                delete newErrors.jobLocationCity;
             } else if (name === "salaryRange" && value.length >= 1) {
-                delete newErros.salaryRange;
+                delete newErrors.salaryRange;
             } else if (name === "experience" && value.length >= 1) {
-                delete newErros.experience;
+                delete newErrors.experience;
             } else if (name === "qualification" && value.length >= 1) {
-                delete newErros.qualification;
+                delete newErrors.qualification;
             } else if (name === "jobDescription" && value.length >= 1) {
-                delete newErros.jobDescription;
+                delete newErrors.jobDescription;
+            } else if (name === "requirements" && value.length >= 1) {
+                delete newErrors.requirements;
+            } else if (name === "responsibilities" && value.length >= 1) {
+                delete newErrors.responsibilities;
             }
-            return newErros;
+            return newErrors;
         });
     }
+
+    console.log(input)
 
     const changeEventHandler = (e: ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
         const { name, value } = e.target;
@@ -112,18 +121,22 @@ export default function JobPostingForm() {
         errorHandler(name, value);
     }
 
-    const selectValueChange = (value: string, type: 'jobCategory' | 'jobType') => {
-        setSelectValue({
-            ...selectValue, [type]: value
+    const selectValueChange = (value: string, type: 'jobCategory' | 'jobType' | 'workExperience' | 'salary') => {
+        setInput({
+            ...input, [type]: value
         });
 
-        setSelectErrors((prevErrors: Partial<jobPostSelectSchemaType>) => {
+        setErrors((prevErrors: Partial<jobPostSchemaType>) => {
             const newErrors = { ...prevErrors };
 
-            if (type === "jobCategory" && ['technology', 'design', 'marketing'].includes(value)) {
+            if (type === "jobCategory" && ['Technology', 'Design', 'Marketing', 'Other'].includes(value)) {
                 delete newErrors.jobCategory;
-            } else if (type === "jobType" && ['full-time', 'part-time', 'contract'].includes(value)) {
+            } else if (type === "jobType" && ['Full Time', 'Part Time', 'Remote', 'Contract'].includes(value)) {
                 delete newErrors.jobType;
+            } else if (type === "workExperience" && ['Senior', 'Internship', 'Entry Level'].includes(value)) {
+                delete newErrors.workExperience;
+            } else if (type === "salary" && ['Hourly', 'Monthly', 'Yearly'].includes(value)) {
+                delete newErrors.salary;
             }
 
             return newErrors;
@@ -138,21 +151,10 @@ export default function JobPostingForm() {
             setErrors(fieldErrors as Partial<jobPostSchemaType>);
             return;
         }
-        const selectResult = jobPostSelectSchema.safeParse(selectValue);
-        if (!selectResult.success) {
-            const fieldErrors = selectResult.error.formErrors.fieldErrors;
-            setSelectErrors(fieldErrors as Partial<jobPostSelectSchemaType>);
-            return;
-        }
 
         try {
-            const form = {
-                ...input,
-                ...selectValue
-            }
-            const res = await createJob(form);
+            await createJob(input);
             router.push('/');
-            console.log(res);
         } catch (error) {
             console.log(error);
         }
@@ -179,7 +181,6 @@ export default function JobPostingForm() {
                             )}
                         </div>
                     </div>
-
                     <div className="space-y-2">
                         <Label htmlFor="job-title">Job Title</Label>
                         <Input id="job-title" onChange={changeEventHandler} name="jobTitle" value={input.jobTitle} placeholder="Title" />
@@ -187,23 +188,56 @@ export default function JobPostingForm() {
                             <span className="text-xs text-red-500">{errors.jobTitle}</span>
                         )}
                     </div>
-
+                    <div className="grid grid-cols-2 gap-6">
+                        <div className="space-y-2">
+                            <Label htmlFor="work-experience">Work Experience</Label>
+                            <Select name="workExperience" onValueChange={(e) => selectValueChange(e, 'workExperience')}>
+                                <SelectTrigger id="work-experience">
+                                    <SelectValue placeholder="----Select Experience----" />
+                                </SelectTrigger>
+                                <SelectContent>
+                                    <SelectItem value="Senior">Senior</SelectItem>
+                                    <SelectItem value="Internship">Internship</SelectItem>
+                                    <SelectItem value="Enty Level">Enty Level</SelectItem>
+                                </SelectContent>
+                            </Select>
+                            {errors && (
+                                <span className="text-xs text-red-500">{errors.workExperience}</span>
+                            )}
+                        </div>
+                        <div className="space-y-2">
+                            <Label htmlFor="salary">Salary</Label>
+                            <Select name="salary" onValueChange={(e) => selectValueChange(e, 'salary')}>
+                                <SelectTrigger id="salary">
+                                    <SelectValue placeholder="----Select Salary----" />
+                                </SelectTrigger>
+                                <SelectContent>
+                                    <SelectItem value="Hourly">Hourly</SelectItem>
+                                    <SelectItem value="Monthly">Monthly</SelectItem>
+                                    <SelectItem value="Yearly">Yearly</SelectItem>
+                                </SelectContent>
+                            </Select>
+                            {errors && (
+                                <span className="text-xs text-red-500">{errors.salary}</span>
+                            )}
+                        </div>
+                    </div>
                     <div className="grid grid-cols-2 gap-6">
                         <div className="space-y-2">
                             <Label htmlFor="job-category">Job Category</Label>
                             <Select name="jobCategory" onValueChange={(e) => selectValueChange(e, 'jobCategory')}>
                                 <SelectTrigger id="job-category">
-                                    <SelectValue placeholder="----Select Technology----" />
+                                    <SelectValue placeholder="----Select Category----" />
                                 </SelectTrigger>
                                 <SelectContent>
-                                    <SelectItem value="technology">Technology</SelectItem>
-                                    <SelectItem value="design">Design</SelectItem>
-                                    <SelectItem value="marketing">Marketing</SelectItem>
-                                    <SelectItem value="other">Other</SelectItem>
+                                    <SelectItem value="Technology">Technology</SelectItem>
+                                    <SelectItem value="Design">Design</SelectItem>
+                                    <SelectItem value="Marketing">Marketing</SelectItem>
+                                    <SelectItem value="Other">Other</SelectItem>
                                 </SelectContent>
                             </Select>
-                            {selectErrors && (
-                                <span className="text-xs text-red-500">{selectErrors.jobCategory}</span>
+                            {errors && (
+                                <span className="text-xs text-red-500">{errors.jobCategory}</span>
                             )}
                         </div>
                         <div className="space-y-2">
@@ -213,13 +247,14 @@ export default function JobPostingForm() {
                                     <SelectValue placeholder="----Select Type----" />
                                 </SelectTrigger>
                                 <SelectContent>
-                                    <SelectItem value="full-time">Full Time</SelectItem>
-                                    <SelectItem value="part-time">Part Time</SelectItem>
-                                    <SelectItem value="contract">Contract</SelectItem>
+                                    <SelectItem value="Full Time">Full Time</SelectItem>
+                                    <SelectItem value="Part Time">Part Time</SelectItem>
+                                    <SelectItem value="Remote">Remote</SelectItem>
+                                    <SelectItem value="Contract">Contract</SelectItem>
                                 </SelectContent>
                             </Select>
-                            {selectErrors && (
-                                <span className="text-xs text-red-500">{selectErrors.jobType}</span>
+                            {errors && (
+                                <span className="text-xs text-red-500">{errors.jobType}</span>
                             )}
                         </div>
                     </div>
@@ -227,7 +262,6 @@ export default function JobPostingForm() {
                     <div className="grid grid-cols-2 gap-6">
                         <div className="space-y-2">
                             <Label htmlFor="job-location">Job Location (Country)</Label>
-                            {/* <Input id="job-location" onChange={changeEventHandler} name="joblocation" value={input.joblocation} placeholder="Location" /> */}
                             <LocationSelector value={value} setValue={setValue} />
                             {errors && (
                                 <span className="text-xs text-red-500">{errors.jobLocationCountry}</span>
@@ -270,7 +304,6 @@ export default function JobPostingForm() {
 
                         <div className="space-y-2">
                             <Label htmlFor="application-deadline">Application Deadline</Label>
-                            {/* <Input id="application-deadline" onChange={changeEventHandler} name="applicationDeadline" value={input.applicationDeadline} placeholder="Job application deadline" /> */}
                             <DatePicker date={date} setDate={setDate} />
                             {errors && (
                                 <span className="text-xs text-red-500">{errors.applicationDeadline}</span>
@@ -278,10 +311,26 @@ export default function JobPostingForm() {
                         </div>
                     </div>
                     <div className="space-y-2">
-                        <Label className="font-semibold text-[16px]" htmlFor="job-description">Job Description</Label>
+                        <Label className="font-semibold text-[18px]" htmlFor="job-description">Job Description</Label>
                         <Textarea id="job-description" onChange={changeEventHandler} name="jobDescription" value={input.jobDescription} placeholder="Job Description" className="h-32" />
                         {errors && (
                             <span className="text-xs text-red-500">{errors.jobDescription}</span>
+                        )}
+                    </div>
+
+                    <div className="space-y-2">
+                        <Label className="font-semibold text-[18px]" htmlFor="requirements">Requirements</Label>
+                        <ReqPointsList input={input} setInput={setInput} errorHandler={errorHandler} />
+                        {errors && (
+                            <span className="text-xs text-red-500">{errors.requirements}</span>
+                        )}
+                    </div>
+
+                    <div className="space-y-2">
+                        <Label className="font-semibold text-[18px]" htmlFor="responsibilities">Responsibilities</Label>
+                        <ResPointsList input={input} setInput={setInput} errorHandler={errorHandler} />
+                        {errors && (
+                            <span className="text-xs text-red-500">{errors.responsibilities}</span>
                         )}
                     </div>
 

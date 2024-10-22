@@ -83,7 +83,7 @@ const Home: NextPage = () => {
         <div className="mt-8 flex justify-center">
           <Link href={`/job-search`}>
             <Button className="hover:scale-105">
-              Load More
+              See More
             </Button>
           </Link>
         </div>

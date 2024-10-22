@@ -14,7 +14,11 @@ const MainLayout: React.FC<MainLayoutProps> = ({ children }) => {
             <MainNavbar />
             <AuthCheck>
                 <main className='pt-[75px]'>{children}</main>
-                <Toaster />
+                <Toaster
+                    toastOptions={{
+                        duration: 5000,
+                    }}
+                />
             </AuthCheck>
             <Footer />
         </div>

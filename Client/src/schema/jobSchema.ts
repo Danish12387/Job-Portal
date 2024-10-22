@@ -11,17 +11,12 @@ export const jobPostSchema = z.object({
     qualification: z.string().min(1, "Qualification is required"),
     applicationDeadline: z.string().min(1, "Application Deadline is required"),
     jobDescription: z.string().min(300, "Job Description should be atleast 300 characters long"),
+    jobCategory: z.string().min(1, "Job Category is required"),
+    jobType: z.string().min(1, "Job Type is required"),
+    workExperience: z.string().min(1, "Work Experience is required"),
+    salary: z.string().min(1, "Salary is required"),
+    requirements: z.array(z.string().min(1, "Atleast 1 requirement point is required")),
+    responsibilities: z.array(z.string().min(1, "Atleast 1 responsibility point is required")),
 });
 
 export type jobPostSchemaType = z.infer<typeof jobPostSchema>
-
-export const jobPostSelectSchema = z.object({
-    jobCategory: z.string().min(1, "Job Category is required"),
-    jobType: z.string().min(1, "Job Type is required"),
-})
-
-export type jobPostSelectSchemaType = z.infer<typeof jobPostSelectSchema>
-
-const jobCombinedSchema = jobPostSchema.merge(jobPostSelectSchema);
-
-export type CombinedJobPostSchemaType = z.infer<typeof jobCombinedSchema>;

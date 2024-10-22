@@ -265,8 +265,8 @@ const Countries = [
 ];
 
 interface LocationSelectorProps {
-    value: string | undefined;
-    setValue: React.Dispatch<React.SetStateAction<string | undefined>>;
+    value: string;
+    setValue: React.Dispatch<React.SetStateAction<string>>;
 }
 
 export function LocationSelector({ value, setValue }: LocationSelectorProps): JSX.Element {
