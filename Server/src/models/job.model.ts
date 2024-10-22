@@ -13,6 +13,10 @@ interface IJob {
     jobDescription: string,
     jobCategory: string,
     jobType: string,
+    workExperience: string,
+    salary: string,
+    requirements: string[],
+    responsibilities: string[],
 }
 
 export interface IJobDocument extends IJob, Document {
@@ -67,6 +71,22 @@ const jobSchema = new mongoose.Schema({
     },
     jobType: {
         type: String,
+        required: true
+    },
+    workExperience: {
+        type: String,
+        required: true
+    },
+    salary: {
+        type: String,
+        required: true
+    },
+    requirements: {
+        type: Array,
+        required: true
+    },
+    responsibilities: {
+        type: Array,
         required: true
     },
 }, { timestamps: true });

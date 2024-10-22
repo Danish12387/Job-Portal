@@ -16,15 +16,34 @@ export const createJob = async (req: Request, res: Response) => {
     }
 }
 
-export const getJobs = async (_: Request, res: Response) => {
+export const getAllJobs = async (_: Request, res: Response) => {
     try {
-        const jobs = await Job.find();
+        const jobs = await Job.find().sort({ createdAt: -1 });
 
         return res.status(200).json({
             success: true,
             message: "Fetched jobs successfully",
             jobs: jobs,
             count: jobs.length,
+        });
+    } catch (error) {
+        console.error(error);
+        return res.status(500).json({
+            success: false,
+            message: "Internal Server Error",
+        });
+    }
+};
+
+export const getSingleJob = async (req: Request, res: Response) => {
+    try {
+        const jobId = req.params.id;
+        const job = await Job.findById(jobId);
+
+        return res.status(200).json({
+            success: true,
+            message: "Job fetched successfully",
+            job: job,
         });
     } catch (error) {
         console.error(error);
