@@ -16,15 +16,28 @@ export const createJob = async (req: Request, res: Response) => {
     }
 }
 
-export const getAllJobs = async (_: Request, res: Response) => {
+export const getAllJobs = async (req: Request, res: Response) => {
     try {
-        const jobs = await Job.find().sort({ createdAt: -1 });
+        const page = parseInt(req.query.page as string) || 1;
+
+        const limit = 6;
+
+        const skip = (page - 1) * limit;
+
+        const jobs = await Job.find()
+            .sort({ createdAt: -1 })
+            // .skip(skip)
+            // .limit(limit);
+
+        const totalJobs = await Job.countDocuments();
 
         return res.status(200).json({
             success: true,
             message: "Fetched jobs successfully",
             jobs: jobs,
-            count: jobs.length,
+            currentPage: page,
+            totalPages: Math.ceil(totalJobs / limit),
+            totalJobs: totalJobs,
         });
     } catch (error) {
         console.error(error);
@@ -34,6 +47,7 @@ export const getAllJobs = async (_: Request, res: Response) => {
         });
     }
 };
+
 
 export const getSingleJob = async (req: Request, res: Response) => {
     try {
