@@ -4,13 +4,19 @@ import { Job } from '@/utils/apiHandlers';
 interface JobState {
     jobs: Job[];
     jobDetails: Job | null;
-    count: number;
+    totalJobs: number;
+    page: number;
+    hasMore: boolean,
+    jobLoading: boolean,
 }
 
 const initialState: JobState = {
     jobs: [],
     jobDetails: null,
-    count: 0,
+    totalJobs: 0,
+    page: 1,
+    hasMore: true,
+    jobLoading: false,
 };
 
 const jobSlice = createSlice({
@@ -21,13 +27,22 @@ const jobSlice = createSlice({
             state.jobs = action.payload;
         },
         setJobsCount: (state, action: PayloadAction<number>) => {
-            state.count = action.payload;
+            state.totalJobs = action.payload;
         },
         setJobDetails: (state, action: PayloadAction<Job | null>) => {
             state.jobDetails = action.payload;
         },
+        incrementPage: (state, action: PayloadAction<number>) => {
+            state.page = action.payload;
+        },
+        setHasMore: (state, action: PayloadAction<boolean>) => {
+            state.hasMore = action.payload;
+        },
+        setJobLoading: (state, action: PayloadAction<boolean>) => {
+            state.jobLoading = action.payload;
+        },
     },
 });
 
-export const { setJobs, setJobsCount, setJobDetails } = jobSlice.actions;
+export const { setJobs, setJobsCount, setJobDetails, incrementPage, setHasMore, setJobLoading } = jobSlice.actions;
 export default jobSlice.reducer;

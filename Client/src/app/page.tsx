@@ -1,3 +1,4 @@
+'use client'
 import MainLayout from "@/components/MainLayout";
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input";
@@ -5,6 +6,7 @@ import { Search } from "lucide-react";
 import Image from "next/image";
 import { NextPage } from "next";
 import Link from "next/link";
+import { createJob } from "@/utils/apiHandlers";
 
 const Home: NextPage = () => {
   const categories = Array(10).fill('Technology')
@@ -16,9 +18,223 @@ const Home: NextPage = () => {
     type: 'Full Time',
   })
 
+  const boomData = [
+    {
+      companyName: "Meta",
+      websiteLink: "Not Available",
+      jobTitle: "Backend Developer",
+      jobLocationCountry: "United Kingdom",
+      jobLocationCity: "New York",
+      salaryRange: "20000",
+      experience: "6 years",
+      qualification: "Metric",
+      applicationDeadline: "Oct 17, 2024",
+      jobDescription: "We are looking for an exceptionally skilled Senior Mobile App Developer...",
+      jobCategory: "Technology",
+      jobType: "Remote",
+      workExperience: "Senior",
+      salary: "Yearly",
+      requirements: ["Master's degree in Computer Science"],
+      responsibilities: ["Design, develop and test mobile applications for Android and iOS platforms"]
+    },
+    {
+      companyName: "Google",
+      websiteLink: "google.com",
+      jobTitle: "Full Stack Developer",
+      jobLocationCountry: "USA",
+      jobLocationCity: "San Francisco",
+      salaryRange: "150000",
+      experience: "4 years",
+      qualification: "Bachelor's",
+      applicationDeadline: "Dec 1, 2024",
+      jobDescription: "We are seeking an experienced Full Stack Developer with expertise in React and Node.js.",
+      jobCategory: "Technology",
+      jobType: "On-site",
+      workExperience: "Mid-Level",
+      salary: "Monthly",
+      requirements: ["Bachelor's degree in Software Engineering"],
+      responsibilities: ["Build full-stack applications using modern technologies"]
+    },
+    {
+      companyName: "Apple",
+      websiteLink: "apple.com",
+      jobTitle: "iOS Developer",
+      jobLocationCountry: "USA",
+      jobLocationCity: "Cupertino",
+      salaryRange: "180000",
+      experience: "5 years",
+      qualification: "Bachelor's",
+      applicationDeadline: "Nov 5, 2024",
+      jobDescription: "Looking for a highly skilled iOS Developer to work on next-gen mobile apps.",
+      jobCategory: "Technology",
+      jobType: "On-site",
+      workExperience: "Mid-Level",
+      salary: "Yearly",
+      requirements: ["5 years of iOS development experience"],
+      responsibilities: ["Develop, test, and deploy iOS apps"]
+    },
+    {
+      companyName: "Tesla",
+      websiteLink: "tesla.com",
+      jobTitle: "Software Engineer",
+      jobLocationCountry: "USA",
+      jobLocationCity: "Austin",
+      salaryRange: "170000",
+      experience: "3 years",
+      qualification: "Bachelor's",
+      applicationDeadline: "Oct 30, 2024",
+      jobDescription: "We are looking for a talented Software Engineer to join our autonomous vehicle team.",
+      jobCategory: "Technology",
+      jobType: "On-site",
+      workExperience: "Junior",
+      salary: "Yearly",
+      requirements: ["Bachelor's degree in Computer Science"],
+      responsibilities: ["Develop software for autonomous driving"]
+    },
+    {
+      companyName: "Microsoft",
+      websiteLink: "microsoft.com",
+      jobTitle: "Cloud Architect",
+      jobLocationCountry: "Canada",
+      jobLocationCity: "Vancouver",
+      salaryRange: "200000",
+      experience: "7 years",
+      qualification: "Master's",
+      applicationDeadline: "Jan 10, 2025",
+      jobDescription: "Looking for an experienced Cloud Architect to lead cloud infrastructure projects.",
+      jobCategory: "Technology",
+      jobType: "Remote",
+      workExperience: "Senior",
+      salary: "Yearly",
+      requirements: ["Master's in Computer Science or related field"],
+      responsibilities: ["Design and maintain cloud infrastructure solutions"]
+    },
+    {
+      companyName: "Amazon",
+      websiteLink: "amazon.jobs",
+      jobTitle: "DevOps Engineer",
+      jobLocationCountry: "USA",
+      jobLocationCity: "Seattle",
+      salaryRange: "160000",
+      experience: "5 years",
+      qualification: "Bachelor's",
+      applicationDeadline: "Nov 20, 2024",
+      jobDescription: "Join our DevOps team to help scale cloud infrastructure for global services.",
+      jobCategory: "Technology",
+      jobType: "Remote",
+      workExperience: "Mid-Level",
+      salary: "Yearly",
+      requirements: ["Bachelor's in Computer Science or equivalent"],
+      responsibilities: ["Implement CI/CD pipelines"]
+    },
+    {
+      companyName: "Netflix",
+      websiteLink: "netflix.com",
+      jobTitle: "Data Engineer",
+      jobLocationCountry: "USA",
+      jobLocationCity: "Los Angeles",
+      salaryRange: "180000",
+      experience: "6 years",
+      qualification: "Bachelor's",
+      applicationDeadline: "Dec 15, 2024",
+      jobDescription: "Seeking a Data Engineer to work on scaling data pipelines for our streaming service.",
+      jobCategory: "Technology",
+      jobType: "Remote",
+      workExperience: "Senior",
+      salary: "Yearly",
+      requirements: ["Bachelor's in Data Science or related field"],
+      responsibilities: ["Design and maintain data pipelines"]
+    },
+    {
+      companyName: "Facebook",
+      websiteLink: "facebook.com",
+      jobTitle: "Frontend Developer",
+      jobLocationCountry: "USA",
+      jobLocationCity: "Menlo Park",
+      salaryRange: "140000",
+      experience: "3 years",
+      qualification: "Bachelor's",
+      applicationDeadline: "Oct 31, 2024",
+      jobDescription: "Looking for a talented frontend developer skilled in React.js and TypeScript.",
+      jobCategory: "Technology",
+      jobType: "On-site",
+      workExperience: "Junior",
+      salary: "Monthly",
+      requirements: ["Experience in modern JavaScript frameworks"],
+      responsibilities: ["Develop user interfaces for web applications"]
+    },
+    {
+      companyName: "Spotify",
+      websiteLink: "spotify.com",
+      jobTitle: "Backend Developer",
+      jobLocationCountry: "Sweden",
+      jobLocationCity: "Stockholm",
+      salaryRange: "120000",
+      experience: "4 years",
+      qualification: "Bachelor's",
+      applicationDeadline: "Dec 5, 2024",
+      jobDescription: "Join Spotify's backend team to develop services that scale to millions of users.",
+      jobCategory: "Technology",
+      jobType: "Remote",
+      workExperience: "Mid-Level",
+      salary: "Monthly",
+      requirements: ["Experience with backend technologies like Node.js"],
+      responsibilities: ["Build and maintain backend APIs"]
+    },
+    {
+      companyName: "Stripe",
+      websiteLink: "stripe.com",
+      jobTitle: "Full Stack Engineer",
+      jobLocationCountry: "USA",
+      jobLocationCity: "San Francisco",
+      salaryRange: "190000",
+      experience: "5 years",
+      qualification: "Bachelor's",
+      applicationDeadline: "Nov 10, 2024",
+      jobDescription: "Full Stack Engineer with experience in Node.js and React.js to work on payment solutions.",
+      jobCategory: "Technology",
+      jobType: "Remote",
+      workExperience: "Mid-Level",
+      salary: "Yearly",
+      requirements: ["Bachelor's in Computer Science"],
+      responsibilities: ["Develop and maintain full-stack applications"]
+    },
+    {
+      companyName: "Oracle",
+      websiteLink: "oracle.com",
+      jobTitle: "Database Administrator",
+      jobLocationCountry: "USA",
+      jobLocationCity: "Redwood City",
+      salaryRange: "130000",
+      experience: "7 years",
+      qualification: "Bachelor's",
+      applicationDeadline: "Oct 25, 2024",
+      jobDescription: "Seeking an experienced DBA to manage Oracle databases for enterprise clients.",
+      jobCategory: "Technology",
+      jobType: "Remote",
+      workExperience: "Senior",
+      salary: "Yearly",
+      requirements: ["Experience with Oracle DBMS"],
+      responsibilities: ["Manage and maintain Oracle database systems"]
+    }
+  ]
+
+  const boom = async () => {
+    await Promise.all(
+      boomData.map(async (item) => {
+        try {
+          await createJob(item);
+        } catch (error) {
+          console.log(error);
+        }
+      })
+    );
+  };
+
   return (
     <MainLayout>
       <div>
+        {/* <Button onClick={() => boom()}>Ready to boom!</Button> */}
         <section className="min-h-screen flex justify-center items-center bg-primary/5">
           <div className="container flex justify-between mx-auto">
             <div className="w-full md:w-2/4 p-5">

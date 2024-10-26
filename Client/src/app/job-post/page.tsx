@@ -111,12 +111,10 @@ export default function JobPostingForm() {
         });
     }
 
-    console.log(input)
-
     const changeEventHandler = (e: ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
         const { name, value } = e.target;
         setInput({
-            ...input, [name]: value
+            ...input, [name]: name === 'salaryRange' ? String(value) : value
         })
         errorHandler(name, value);
     }
@@ -279,7 +277,7 @@ export default function JobPostingForm() {
                     <div className="grid grid-cols-2 gap-6">
                         <div className="space-y-2">
                             <Label htmlFor="salary-range">Salary Range</Label>
-                            <Input id="salary-range" onChange={changeEventHandler} name="salaryRange" value={input.salaryRange} placeholder="Salary Range" />
+                            <Input type="number" id="salary-range" onChange={changeEventHandler} name="salaryRange" value={input.salaryRange} placeholder="Salary Range" />
                             {errors && (
                                 <span className="text-xs text-red-500">{errors.salaryRange}</span>
                             )}

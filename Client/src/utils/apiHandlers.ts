@@ -112,6 +112,7 @@ export async function createJob(data: jobPostSchemaType): Promise<JobResponseDat
 
         if (res.data.success) {
             toast.success(res.data.message);
+            // console.log("Success");
             return res.data;
         }
     } catch (error) {

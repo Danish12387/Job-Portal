@@ -1,30 +1,41 @@
 'use client'
-import React, { useEffect, useState } from 'react'
+import React, { ChangeEvent, ChangeEventHandler, FormEvent, useEffect, useRef, useState } from 'react';
 import { Input } from "@/components/ui/input"
 import { Button } from "@/components/ui/button"
 import { Checkbox } from "@/components/ui/checkbox"
-import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group"
-import { Label } from "@/components/ui/label"
+import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
+import { Label } from "@/components/ui/label";
 import { Slider } from "@/components/ui/slider"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { MapPin, Clock, Briefcase, Search, MoveRight } from 'lucide-react'
 import MainLayout from '@/components/MainLayout'
-import { useAppSelector } from '@/lib/hooks';
+import { useAppDispatch, useAppSelector } from '@/lib/hooks';
 import { formatDistanceToNowStrict } from 'date-fns';
 import Link from 'next/link'
 import { Job } from '@/utils/apiHandlers'
+import { incrementPage, setHasMore } from '@/lib/features/job/jobSlice';
+import InfiniteScroll from 'react-infinite-scroll-component'
+import JobsLoader from '@/components/JobsLoader/JobsLoader';
+import JobCardSkeleton from '@/components/CardsSkeleton';
+import JobCard from '@/components/JobCard';
 
 export default function JobSearchPage() {
-    const { jobs, count } = useAppSelector(state => state.jobs);
+    const dispatch = useAppDispatch();
+    const { jobs, page, hasMore, jobLoading, totalJobs } = useAppSelector(state => state.jobs);
     const { user } = useAppSelector(state => state.user);
     const [newJobs, setNewJobs] = useState<Job[]>([]);
+    const [searchInputs, setSearchInputs] = useState({
+        location: '',
+        search: '',
+    });
 
     const [salary, setSalary] = useState("all");
     const [locationFilter, setLocationFilter] = useState<string>('all');
     const [timeFilter, setTimeFilter] = useState<string>('all-time');
     const [workExperience, setWorkExperience] = useState<string>('any');
     const [selectedJobTypes, setSelectedJobTypes] = useState<string[]>([]);
+    const [selectValue, setSelectValue] = useState<string>('all');
 
     useEffect(() => {
         setNewJobs(jobs);
@@ -32,7 +43,18 @@ export default function JobSearchPage() {
 
     useEffect(() => {
         applyFilters();
-    }, [jobs, locationFilter, timeFilter, selectedJobTypes, workExperience, salary]);
+    }, [jobs, locationFilter, timeFilter, selectedJobTypes, workExperience, salary, selectValue]);
+
+    useEffect(() => {
+        if (searchInputs.search === '' && searchInputs.location === '') {
+            applyFilters();
+        }
+    }, [searchInputs]);
+
+    const loadMoreJobs = () => {
+        // dispatch(incrementPage(page + 1));
+        dispatch(setHasMore(false));
+    };
 
     const applyFilters = () => {
         let filteredJobs = jobs;
@@ -93,6 +115,32 @@ export default function JobSearchPage() {
             });
         }
 
+        if (searchInputs.search) {
+            filteredJobs = filteredJobs.filter(job => {
+                const jobTitleLower = job.jobTitle.toLowerCase();
+                return jobTitleLower.includes(searchInputs.search.toLowerCase());
+            });
+        }
+
+        if (searchInputs.location) {
+            filteredJobs = filteredJobs.filter(job => {
+                const jobLocationLower = job.jobLocationCity.toLowerCase();
+                return jobLocationLower.includes(searchInputs.location.toLowerCase());
+            });
+        }
+
+        interface Job {
+            createdAt: string | Date;
+        }
+
+        if (selectValue === "date") {
+            filteredJobs = [...filteredJobs].sort((a: Job, b: Job) => {
+                const dateA = new Date(a.createdAt).getTime();
+                const dateB = new Date(b.createdAt).getTime();
+                return dateB - dateA;
+            });
+        }
+
         setNewJobs(filteredJobs);
     };
 
@@ -128,6 +176,20 @@ export default function JobSearchPage() {
         return selectedJobTypes.includes(jobType);
     };
 
+    const changeSearchHandler = (e: ChangeEvent<HTMLInputElement>) => {
+        const { name, value } = e.target;
+        setSearchInputs(prev => ({ ...prev, [name]: value }));
+    }
+
+    const submitSearchHandler = (e: FormEvent<HTMLFormElement>) => {
+        e.preventDefault();
+        applyFilters();
+    }
+
+    const selectValueChange = (value: string) => {
+        setSelectValue(value);
+    }
+
     return (
         <MainLayout>
             <div className="container mx-auto px-4 py-14">
@@ -138,12 +200,12 @@ export default function JobSearchPage() {
                     Thousands of jobs in the computer, engineering and technology sectors are waiting for you.
                 </p>
 
-                <div className="flex flex-col md:flex-row mb-8 relative">
-                    <Input className="flex-grow pl-10 rounded-r-none" placeholder="What position are you looking for?" />
+                <form onSubmit={submitSearchHandler} className="flex flex-col md:flex-row mb-8 relative">
+                    <Input name='search' value={searchInputs.search} onChange={changeSearchHandler} className="flex-grow pl-10 rounded-r-none" placeholder="What position are you looking for?" />
                     <Search className="absolute inset-y-2 top-3 left-2 text-gray-400 pointer-events-none" />
-                    <Input className="md:w-[50%] rounded-none border-l-0" placeholder="Location" />
-                    <Button className="md:w-1/6 rounded-l-none h-12">Search Jobs</Button>
-                </div>
+                    <Input name='location' value={searchInputs.location} onChange={changeSearchHandler} className="md:w-[50%] rounded-none border-l-0" placeholder="Location (city name)" />
+                    <Button type='submit' className="md:w-1/6 rounded-l-none h-12">Search Jobs</Button>
+                </form>
 
                 <div className="flex flex-col lg:flex-row gap-8">
                     <div className="lg:w-1/4">
@@ -259,12 +321,13 @@ export default function JobSearchPage() {
 
                     <div className="lg:w-3/4">
                         <div className="flex justify-between items-center mb-4">
-                            <h2 className="text-2xl font-semibold">{newJobs?.length} Jobs</h2>
-                            <Select>
+                            <h2 className="text-2xl font-semibold">{!jobLoading && newJobs?.length} Jobs</h2>
+                            <Select onValueChange={(e) => selectValueChange(e)}>
                                 <SelectTrigger className="w-[180px]">
                                     <SelectValue placeholder="Filter by" />
                                 </SelectTrigger>
                                 <SelectContent>
+                                    <SelectItem value="all">All</SelectItem>
                                     <SelectItem value="relevance">Relevance</SelectItem>
                                     <SelectItem value="date">Date</SelectItem>
                                     <SelectItem value="salary">Salary</SelectItem>
@@ -273,38 +336,24 @@ export default function JobSearchPage() {
                         </div>
 
                         <div className="space-y-4">
-                            {
-                                newJobs.length > 0 ? (
-                                    newJobs?.map((job, index) => (
-                                        <Card key={index} className='rounded-md my-5'>
-                                            <CardContent className="flex items-start p-6">
-                                                <div className="w-12 h-12 bg-gray-200 rounded-full mr-4 flex-shrink-0"></div>
-                                                <div className="flex-grow">
-                                                    <div className='flex justify-between items-center'>
-                                                        <div>
-                                                            <p className="text-gray-800">{job.companyName}</p>
-                                                            <h3 className="font-semibold text-lg">{job.jobTitle}</h3>
-                                                        </div>
-                                                        <Link href={`/job-details/${job._id}`}>
-                                                            <Button variant="outline" className="text-sm text-primary hover:text-primary">Apply now</Button>
-                                                        </Link>
-                                                    </div>
-                                                    <div className="flex flex-wrap justify-between pr-5 mt-2">
-                                                        <span className="flex items-center text-sm text-gray-500"><MapPin className="w-4 h-4 mr-1" />{job.jobLocationCountry}, {job.jobLocationCity}</span>
-                                                        <span className="flex items-center text-sm text-gray-500"><Briefcase className="w-4 h-4 mr-1" />{job.jobType}</span>
-                                                        <span className="flex items-center text-sm text-gray-500">{job.salaryRange}</span>
-                                                        <span className="flex items-center text-sm text-gray-500"><Clock className="w-4 h-4 mr-1" />   {formatDistanceToNowStrict(new Date(job.createdAt), { addSuffix: true })}</span>
-                                                    </div>
-                                                    <p className='line-clamp-2 text-sm text-gray-600 mt-3'>{job.jobDescription}</p>
-                                                </div>
-                                            </CardContent>
-                                        </Card>
-                                    )))
-                                    :
-                                    (
-                                        <div className='my-10 text-xl font-semibold text-center'>No Results Found!</div>
-                                    )
-                            }
+                            <InfiniteScroll
+                                dataLength={jobs.length}
+                                next={loadMoreJobs}
+                                hasMore={hasMore}
+                                loader={Array(6).fill(0).map((_, index) => <JobCardSkeleton key={index} />)}
+                                endMessage={<p className='text-center hidden text-gray-600'>No more jobs to load</p>}
+                            >
+                                {
+                                    newJobs.length > 0 ? (
+                                        newJobs?.map((job, index) => (
+                                            <JobCard job={job} key={index} />
+                                        )))
+                                        :
+                                        (
+                                            !jobLoading && (<div className='my-10 text-xl font-semibold text-center'>No Results Found!</div>)
+                                        )
+                                }
+                            </InfiniteScroll>
                         </div>
                     </div>
 
