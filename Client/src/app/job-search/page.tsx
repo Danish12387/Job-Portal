@@ -14,7 +14,7 @@ import { useAppDispatch, useAppSelector } from '@/lib/hooks';
 import { formatDistanceToNowStrict } from 'date-fns';
 import Link from 'next/link'
 import { Job } from '@/utils/apiHandlers'
-import { incrementPage, setHasMore } from '@/lib/features/job/jobSlice';
+import { incrementPage, JobFilters, setHasMore, setJobFiltersState } from '@/lib/features/job/jobSlice';
 import InfiniteScroll from 'react-infinite-scroll-component'
 import JobsLoader from '@/components/JobsLoader/JobsLoader';
 import JobCardSkeleton from '@/components/CardsSkeleton';
@@ -25,107 +25,112 @@ export default function JobSearchPage() {
     const { jobs, page, hasMore, jobLoading, totalJobs } = useAppSelector(state => state.jobs);
     const { user } = useAppSelector(state => state.user);
     const [newJobs, setNewJobs] = useState<Job[]>([]);
-    const [searchInputs, setSearchInputs] = useState({
-        location: '',
-        search: '',
-    });
 
-    const [salary, setSalary] = useState("all");
-    const [locationFilter, setLocationFilter] = useState<string>('all');
-    const [timeFilter, setTimeFilter] = useState<string>('all-time');
-    const [workExperience, setWorkExperience] = useState<string>('any');
-    const [selectedJobTypes, setSelectedJobTypes] = useState<string[]>([]);
-    const [selectValue, setSelectValue] = useState<string>('all');
+    const [jobFilters, setJobFilters] = useState<JobFilters>({
+        location: 'all',
+        time: 'all-time',
+        selectedJobTypes: [''],
+        workExperience: 'any',
+        salary: 'all',
+        selectValue: 'all',
+        searchInputs: {
+            location: '',
+            search: '',
+        },
+    });
 
     useEffect(() => {
         setNewJobs(jobs);
     }, [jobs]);
 
-    useEffect(() => {
-        applyFilters();
-    }, [jobs, locationFilter, timeFilter, selectedJobTypes, workExperience, salary, selectValue]);
+    console.log(jobs);
 
     useEffect(() => {
-        if (searchInputs.search === '' && searchInputs.location === '') {
-            applyFilters();
+        // applyFilters();
+        dispatch(setJobFiltersState(jobFilters));
+    }, [jobs, jobFilters]);
+
+    useEffect(() => {
+        if (jobFilters.searchInputs.search === '' && jobFilters.searchInputs.location === '') {
+            // applyFilters();
         }
-    }, [searchInputs]);
+    }, [jobFilters.searchInputs]);
 
     const loadMoreJobs = () => {
-        // dispatch(incrementPage(page + 1));
-        dispatch(setHasMore(false));
+        dispatch(incrementPage(page + 1));
+        // dispatch(setHasMore(false));
     };
 
     const applyFilters = () => {
         let filteredJobs = jobs;
 
-        if (locationFilter === 'near-me') {
+        if (jobFilters.location === 'near-me') {
             filteredJobs = filteredJobs.filter(job =>
                 job.jobLocationCity.toLowerCase() === user?.city.toLowerCase()
             );
-        } else if (locationFilter === 'remote') {
+        } else if (jobFilters.location === 'remote') {
             filteredJobs = filteredJobs.filter(job => job.jobType === 'Remote');
         }
 
         const now = new Date();
-        if (timeFilter === 'last-24-hours') {
+        if (jobFilters.time === 'last-24-hours') {
             filteredJobs = filteredJobs.filter(job => {
                 const jobDate = new Date(job.createdAt);
                 return now.getTime() - jobDate.getTime() <= 24 * 60 * 60 * 1000;
             });
-        } else if (timeFilter === 'last-7-days') {
+        } else if (jobFilters.time === 'last-7-days') {
             filteredJobs = filteredJobs.filter(job => {
                 const jobDate = new Date(job.createdAt);
                 return now.getTime() - jobDate.getTime() <= 7 * 24 * 60 * 60 * 1000;
             });
         }
 
-        if (salary === 'Hourly') {
+        if (jobFilters.salary === 'Hourly') {
             filteredJobs = filteredJobs.filter(job => {
                 return job.salary === "Hourly"
             })
-        } else if (salary === 'Monthly') {
+        } else if (jobFilters.salary === 'Monthly') {
             filteredJobs = filteredJobs.filter(job => {
                 return job.salary === "Monthly"
             })
-        } else if (salary === 'Yearly') {
+        } else if (jobFilters.salary === 'Yearly') {
             filteredJobs = filteredJobs.filter(job => {
                 return job.salary === "Yearly"
             })
         }
 
-        if (workExperience === "senior") {
+        if (jobFilters.workExperience === "senior") {
             filteredJobs = filteredJobs.filter(job => {
                 return job.workExperience === "Senior"
             })
-        } else if (workExperience === 'internship') {
+        } else if (jobFilters.workExperience === 'internship') {
             filteredJobs = filteredJobs.filter(job => {
                 return job.workExperience === "Internship"
             })
-        } else if (workExperience === 'entry-level') {
+        } else if (jobFilters.workExperience === 'entry-level') {
             filteredJobs = filteredJobs.filter(job => {
                 return job.workExperience === "Entry Level"
             })
         }
 
-        if (selectedJobTypes.length > 0) {
+        if (jobFilters.selectedJobTypes.length > 1) {
             filteredJobs = filteredJobs.filter(job => {
                 const jobTypeLower = job.jobType.toLowerCase().replace(' ', '-');
-                return selectedJobTypes.includes(jobTypeLower);
+                return jobFilters.selectedJobTypes.includes(jobTypeLower);
             });
         }
 
-        if (searchInputs.search) {
+        if (jobFilters.searchInputs.search) {
             filteredJobs = filteredJobs.filter(job => {
                 const jobTitleLower = job.jobTitle.toLowerCase();
-                return jobTitleLower.includes(searchInputs.search.toLowerCase());
+                return jobTitleLower.includes(jobFilters.searchInputs.search.toLowerCase());
             });
         }
 
-        if (searchInputs.location) {
+        if (jobFilters.searchInputs.location) {
             filteredJobs = filteredJobs.filter(job => {
                 const jobLocationLower = job.jobLocationCity.toLowerCase();
-                return jobLocationLower.includes(searchInputs.location.toLowerCase());
+                return jobLocationLower.includes(jobFilters.searchInputs.location.toLowerCase());
             });
         }
 
@@ -133,7 +138,7 @@ export default function JobSearchPage() {
             createdAt: string | Date;
         }
 
-        if (selectValue === "date") {
+        if (jobFilters.selectValue === "date") {
             filteredJobs = [...filteredJobs].sort((a: Job, b: Job) => {
                 const dateA = new Date(a.createdAt).getTime();
                 const dateB = new Date(b.createdAt).getTime();
@@ -144,41 +149,61 @@ export default function JobSearchPage() {
         setNewJobs(filteredJobs);
     };
 
+    interface searchInputsInterface {
+        location: string;
+        search: string;
+    }
+
+    const onChangeJobFilters = (name: string, value: string | string[] | searchInputsInterface) => {
+        setJobFilters({
+            ...jobFilters,
+            [name]: value
+        });
+    }
+
+    const fetchAllJobs = () => {
+        const pages = Math.ceil(totalJobs / 6);
+        dispatch(incrementPage(pages));
+    }
+
     const filterLocation = (value: string) => {
-        setLocationFilter(value);
+        onChangeJobFilters('location', value);
     };
 
     const filterTime = (value: string) => {
-        setTimeFilter(value);
+        onChangeJobFilters('time', value);
     };
 
     const filterWorkEx = (value: string) => {
-        setWorkExperience(value);
+        onChangeJobFilters('workExperience', value);
     }
 
     const filterSalary = (value: string) => {
-        if (salary === value) {
-            setSalary('all');
+        if (jobFilters.salary === value) {
+            onChangeJobFilters('salary', 'all');
         } else {
-            setSalary(value);
+            onChangeJobFilters('salary', value);
         }
     };
 
     const toggleJobType = (jobType: string) => {
-        if (selectedJobTypes.includes(jobType)) {
-            setSelectedJobTypes(selectedJobTypes.filter(type => type !== jobType));
+        if (jobFilters.selectedJobTypes.includes(jobType)) {
+            // setSelectedJobTypes(selectedJobTypes.filter(type => type !== jobType));
+            const filteredJobTypes = jobFilters.selectedJobTypes.filter(type => type !== jobType);
+            onChangeJobFilters('selectedJobTypes', filteredJobTypes);
         } else {
-            setSelectedJobTypes([...selectedJobTypes, jobType]);
+            // setSelectedJobTypes([...selectedJobTypes, jobType]);
+            onChangeJobFilters('selectedJobTypes', [...jobFilters.selectedJobTypes, jobType]);
         }
     };
 
     const isChecked = (jobType: string) => {
-        return selectedJobTypes.includes(jobType);
+        return jobFilters.selectedJobTypes.includes(jobType);
     };
 
     const changeSearchHandler = (e: ChangeEvent<HTMLInputElement>) => {
         const { name, value } = e.target;
-        setSearchInputs(prev => ({ ...prev, [name]: value }));
+        onChangeJobFilters('searchInputs', { ...jobFilters.searchInputs, [name]: value });
     }
 
     const submitSearchHandler = (e: FormEvent<HTMLFormElement>) => {
@@ -187,7 +212,7 @@ export default function JobSearchPage() {
     }
 
     const selectValueChange = (value: string) => {
-        setSelectValue(value);
+        onChangeJobFilters('selectValue', value);
     }
 
     return (
@@ -201,9 +226,9 @@ export default function JobSearchPage() {
                 </p>
 
                 <form onSubmit={submitSearchHandler} className="flex flex-col md:flex-row mb-8 relative">
-                    <Input name='search' value={searchInputs.search} onChange={changeSearchHandler} className="flex-grow pl-10 rounded-r-none" placeholder="What position are you looking for?" />
+                    <Input name='search' value={jobFilters.searchInputs.search} onChange={changeSearchHandler} className="flex-grow pl-10 rounded-r-none" placeholder="What position are you looking for?" />
                     <Search className="absolute inset-y-2 top-3 left-2 text-gray-400 pointer-events-none" />
-                    <Input name='location' value={searchInputs.location} onChange={changeSearchHandler} className="md:w-[50%] rounded-none border-l-0" placeholder="Location (city name)" />
+                    <Input name='location' value={jobFilters.searchInputs.location} onChange={changeSearchHandler} className="md:w-[50%] rounded-none border-l-0" placeholder="Location (city name)" />
                     <Button type='submit' className="md:w-1/6 rounded-l-none h-12">Search Jobs</Button>
                 </form>
 
@@ -245,7 +270,7 @@ export default function JobSearchPage() {
                                                 <button
                                                     key={option}
                                                     onClick={() => filterSalary(option)}
-                                                    className={`p-2 text-sm border rounded-none ${salary === option ? "border-blue-500 bg-blue-100 text-blue-700" : "border-gray-300"
+                                                    className={`p-2 text-sm border rounded-none ${jobFilters.salary === option ? "border-blue-500 bg-blue-100 text-blue-700" : "border-gray-300"
                                                         }`}
                                                 >
                                                     {option}
@@ -321,7 +346,7 @@ export default function JobSearchPage() {
 
                     <div className="lg:w-3/4">
                         <div className="flex justify-between items-center mb-4">
-                            <h2 className="text-2xl font-semibold">{!jobLoading && newJobs?.length} Jobs</h2>
+                            <h2 className="text-2xl font-semibold">{totalJobs} Jobs</h2>
                             <Select onValueChange={(e) => selectValueChange(e)}>
                                 <SelectTrigger className="w-[180px]">
                                     <SelectValue placeholder="Filter by" />
@@ -340,9 +365,8 @@ export default function JobSearchPage() {
                                 dataLength={jobs.length}
                                 next={loadMoreJobs}
                                 hasMore={hasMore}
-                                loader={Array(6).fill(0).map((_, index) => <JobCardSkeleton key={index} />)}
-                                endMessage={<p className='text-center hidden text-gray-600'>No more jobs to load</p>}
-                            >
+                                loader={jobLoading && Array(6).fill(0).map((_, index) => <JobCardSkeleton key={index} />)}
+                                endMessage={<p className='text-center text-gray-600'>No more jobs to load</p>}>
                                 {
                                     newJobs.length > 0 ? (
                                         newJobs?.map((job, index) => (

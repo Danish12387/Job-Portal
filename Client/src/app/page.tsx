@@ -7,8 +7,10 @@ import Image from "next/image";
 import { NextPage } from "next";
 import Link from "next/link";
 import { createJob } from "@/utils/apiHandlers";
+import { useAppSelector } from "@/lib/hooks";
 
 const Home: NextPage = () => {
+  const { homeJobs } = useAppSelector(state => state.jobs);
   const categories = Array(10).fill('Technology')
   const jobs = Array(5).fill({
     title: 'Fresher UI/UX Designer (1 Year Exp.)',
@@ -274,19 +276,19 @@ const Home: NextPage = () => {
         <section className="container mx-auto py-10">
           <h2 className="text-2xl md:text-3xl text-center font-bold mb-10">All Popular Listed Jobs</h2>
           <div className="space-y-4">
-            {jobs.map((job, index) => (
+            {homeJobs.map((job, index) => (
               <div key={index} className="shadow rounded-lg p-6 bg-white flex sm:flex-row flex-col md:gap-0 gap-10 items-center justify-between">
                 <div className="flex items-center space-x-4">
                   <div className="w-12 h-12 bg-primary rounded-full flex items-center justify-center text-white font-bold text-xl">
                     J
                   </div>
                   <div>
-                    <h3 className="font-semibold text-[16px] sm:text-lg">{job.title}</h3>
-                    <p className="text-sm text-gray-600">{job.company} • {job.location}</p>
-                    <p className="text-sm text-gray-600">{job.salary} • {job.type}</p>
+                    <h3 className="font-semibold text-[16px] sm:text-lg">{job.jobTitle}</h3>
+                    <p className="text-sm text-gray-600">{job.companyName} • {job.jobLocationCountry}</p>
+                    <p className="text-sm text-gray-600">{job.salary} • {job.jobType}</p>
                   </div>
                 </div>
-                <Link href={`/job-details`}>
+                <Link href={`/job-details/${job._id}`}>
                   <Button className="hover:scale-105">
                     View Details
                   </Button>
