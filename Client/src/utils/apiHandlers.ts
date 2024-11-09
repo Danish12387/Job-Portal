@@ -66,9 +66,9 @@ export async function userLogin(input: LoginInputState): Promise<UserResponseDat
             });
             return res.data;
         }
-    } catch (error) {
+    } catch (error: any) {
         console.log(error);
-        // toast.error(error?.response?.data?.message);
+        toast.error(error?.response?.data?.message);
     }
 }
 
@@ -83,9 +83,9 @@ export async function userSignup(input: SignupInputState): Promise<UserResponseD
             toast.success(res.data.message);
             return res.data;
         }
-    } catch (error) {
+    } catch (error: any) {
         console.log(error);
-        // toast.error(error?.response?.data?.message);
+        toast.error(error?.response?.data?.message);
     }
 }
 
@@ -96,9 +96,9 @@ export async function logout() {
         if (res.data.success) {
             toast.success(res.data.message);
         }
-    } catch (error) {
+    } catch (error: any) {
         console.log(error);
-        // toast.error(error?.response?.data?.message);
+        toast.error(error?.response?.data?.message);
     }
 }
 
@@ -115,8 +115,8 @@ export async function createJob(data: jobPostSchemaType): Promise<JobResponseDat
             // console.log("Success");
             return res.data;
         }
-    } catch (error) {
+    } catch (error: any) {
         console.log(error);
-        // toast.error(error?.response?.data?.message);
+        toast.error(error?.response?.data?.message);
     }
 }

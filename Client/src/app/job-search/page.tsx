@@ -14,7 +14,7 @@ import { useAppDispatch, useAppSelector } from '@/lib/hooks';
 import { formatDistanceToNowStrict } from 'date-fns';
 import Link from 'next/link'
 import { Job } from '@/utils/apiHandlers'
-import { incrementPage, JobFilters, setHasMore, setJobFiltersState } from '@/lib/features/job/jobSlice';
+import { incrementPage, JobFilters, setHasMore, setJobFiltersState, setJobLoading } from '@/lib/features/job/jobSlice';
 import InfiniteScroll from 'react-infinite-scroll-component'
 import JobsLoader from '@/components/JobsLoader/JobsLoader';
 import JobCardSkeleton from '@/components/CardsSkeleton';
@@ -45,10 +45,16 @@ export default function JobSearchPage() {
 
     console.log(jobs);
 
+    // useEffect(() => {
+    //     // applyFilters();
+    // }, [jobs, jobFilters]);
+
     useEffect(() => {
-        // applyFilters();
+        setNewJobs([]);
+        dispatch(setJobLoading(true));
         dispatch(setJobFiltersState(jobFilters));
-    }, [jobs, jobFilters]);
+        console.log('changed');
+    }, [jobFilters])
 
     useEffect(() => {
         if (jobFilters.searchInputs.search === '' && jobFilters.searchInputs.location === '') {
@@ -346,7 +352,7 @@ export default function JobSearchPage() {
 
                     <div className="lg:w-3/4">
                         <div className="flex justify-between items-center mb-4">
-                            <h2 className="text-2xl font-semibold">{totalJobs} Jobs</h2>
+                            <h2 className="text-2xl font-semibold">{newJobs.length} Jobs</h2>
                             <Select onValueChange={(e) => selectValueChange(e)}>
                                 <SelectTrigger className="w-[180px]">
                                     <SelectValue placeholder="Filter by" />

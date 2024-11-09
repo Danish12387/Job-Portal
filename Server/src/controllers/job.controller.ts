@@ -36,37 +36,41 @@ export const getAllJobs = async (req: Request, res: Response) => {
         //     query.jobType = 'Remote';
         // }
 
-        if (filters.time === 'last-24-hours') {
-            query.createdAt = { $gte: new Date(now.getTime() - 24 * 60 * 60 * 1000) };
-        } else if (filters.time === 'last-7-days') {
-            query.createdAt = { $gte: new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000) };
-        }
+        // if (filters.time === 'last-24-hours') {
+        //     query.createdAt = { $gte: new Date(now.getTime() - 24 * 60 * 60 * 1000) };
+        // } else if (filters.time === 'last-7-days') {
+        //     query.createdAt = { $gte: new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000) };
+        // }
 
-        if (filters.salary) {
+        if (filters.salary && filters.salary !== 'all') {
             query.salary = filters.salary;
+        } else {
+            delete query.salary;
         }
 
-        if (filters.workExperience) {
-            query.workExperience = filters.workExperience;
-        }
+        // if (filters.workExperience) {
+        //     query.workExperience = filters.workExperience;
+        // }
 
-        if (filters.selectedJobTypes && filters.selectedJobTypes.length > 0) {
-            query.jobType = { $in: filters.selectedJobTypes };
-        }
+        // if (filters.selectedJobTypes && filters.selectedJobTypes.length > 0) {
+        //     query.jobType = { $in: filters.selectedJobTypes };
+        // }
 
-        if (filters.searchInputs?.search) {
-            query.jobTitle = new RegExp(filters.searchInputs.search, 'i');
-        }
-        if (filters.searchInputs?.location) {
-            query.jobLocationCity = new RegExp(filters.searchInputs.location, 'i');
-        }
+        // if (filters.searchInputs?.search) {
+        //     query.jobTitle = new RegExp(filters.searchInputs.search, 'i');
+        // }
+        // if (filters.searchInputs?.location) {
+        //     query.jobLocationCity = new RegExp(filters.searchInputs.location, 'i');
+        // }
+
+        console.log(query);
 
         const sort = filters.selectValue === 'date' ? { createdAt: -1 } : {};
 
         const jobs = await Job.find(query)
             // .sort(sort)
-            .skip(skip)
-            .limit(filters.pageSize);
+            // .skip(skip)
+            // .limit(limit);
 
         const totalJobs = await Job.countDocuments();
 

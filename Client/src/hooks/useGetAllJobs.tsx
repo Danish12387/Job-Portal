@@ -39,10 +39,10 @@ const useGetAllJobs = () => {
                         }
                         dispatch(setJobsCount(res.data.totalJobs));
 
-                        if (res.data.jobs.length < 6) {
-                            dispatch(setHasMore(false));
-                        }
-                    }, 1500);
+                        // if (res.data.jobs.length < 6) {
+                        //     dispatch(setHasMore(false));
+                        // }
+                    }, 100);
                 }
             } catch (error) {
                 console.log(error);
