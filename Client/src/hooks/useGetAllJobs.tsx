@@ -34,13 +34,13 @@ const useGetAllJobs = () => {
                             const homejobs = res.data.jobs.slice(0, 6);
                             dispatch(setHomeJobs(homejobs));
                         } else {
-                            const shuffledItems = shuffleArray([...res.data.jobs]);
-                            dispatch(setJobs([...jobs, ...shuffledItems]));
+                            // const shuffledItems = shuffleArray([...res.data.jobs]);
+                            dispatch(setJobs([...jobs, ...res.data.jobs]));
                         }
                         dispatch(setJobsCount(res.data.totalJobs));
 
-                        // if (res.data.jobs.length < 6) {
-                        //     dispatch(setHasMore(false));
+                        // if (res.data.totalPages <= res.data.currentPage) {
+                        dispatch(setHasMore(false));
                         // }
                     }, 100);
                 }
@@ -49,14 +49,14 @@ const useGetAllJobs = () => {
             } finally {
                 setTimeout(() => {
                     dispatch(setJobLoading(false));
-                }, 1500);
+                }, 2000);
             }
         }
-        if (hasMore) {
-            fetchJobs();
-        } else {
-            dispatch(setJobLoading(false));
-        }
+        fetchJobs();
+        // if (hasMore) {
+        // } else {
+        //     dispatch(setJobLoading(false));
+        // }
     }, [page, hasMore, jobFiltersState])
 }
 

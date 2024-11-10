@@ -33,7 +33,7 @@ const initialState: JobState = {
     totalJobs: 0,
     page: 1,
     hasMore: true,
-    jobLoading: false,
+    jobLoading: true,
 };
 
 const jobSlice = createSlice({

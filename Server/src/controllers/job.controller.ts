@@ -21,7 +21,6 @@ export const getAllJobs = async (req: Request, res: Response) => {
         const page = parseInt(req.query.page as string) || 1;
 
         const filters = JSON.parse(req.query.filters as string);
-        console.log(filters);
 
         const limit = 6;
 
@@ -30,17 +29,19 @@ export const getAllJobs = async (req: Request, res: Response) => {
         const query: any = {};
         const now = new Date();
 
-        // if (filters.location === 'near-me') {
-        //     query.jobLocationCity = 'near-me';
-        // } else if (filters.location === 'remote') {
-        //     query.jobType = 'Remote';
-        // }
+        if (filters.location !== 'all') {
+            if (filters.location === 'Remote') {
+                query.jobType = 'Remote';
+            } else {
+                query.jobLocationCity = filters.location;
+            }
+        }
 
-        // if (filters.time === 'last-24-hours') {
-        //     query.createdAt = { $gte: new Date(now.getTime() - 24 * 60 * 60 * 1000) };
-        // } else if (filters.time === 'last-7-days') {
-        //     query.createdAt = { $gte: new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000) };
-        // }
+        if (filters.time === 'last-24-hours') {
+            query.createdAt = { $gte: new Date(now.getTime() - 24 * 60 * 60 * 1000) };
+        } else if (filters.time === 'last-7-days') {
+            query.createdAt = { $gte: new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000) };
+        }
 
         if (filters.salary && filters.salary !== 'all') {
             query.salary = filters.salary;
@@ -48,29 +49,29 @@ export const getAllJobs = async (req: Request, res: Response) => {
             delete query.salary;
         }
 
-        // if (filters.workExperience) {
-        //     query.workExperience = filters.workExperience;
-        // }
+        if (filters.workExperience && filters.workExperience !== 'any') {
+            query.workExperience = filters.workExperience;
+        } else {
+            delete query.workExperience;
+        }
 
-        // if (filters.selectedJobTypes && filters.selectedJobTypes.length > 0) {
-        //     query.jobType = { $in: filters.selectedJobTypes };
-        // }
+        if (filters.selectedJobTypes && filters.selectedJobTypes.length > 0 && !filters.selectedJobTypes.includes('')) {
+            query.jobType = { $in: filters.selectedJobTypes };
+        }
 
-        // if (filters.searchInputs?.search) {
-        //     query.jobTitle = new RegExp(filters.searchInputs.search, 'i');
-        // }
-        // if (filters.searchInputs?.location) {
-        //     query.jobLocationCity = new RegExp(filters.searchInputs.location, 'i');
-        // }
+        if (filters.searchInputs?.search) {
+            query.jobTitle = new RegExp(filters.searchInputs.search, 'i');
+        }
+        if (filters.searchInputs?.location) {
+            query.jobLocationCity = new RegExp(filters.searchInputs.location, 'i');
+        }
 
-        console.log(query);
-
-        const sort = filters.selectValue === 'date' ? { createdAt: -1 } : {};
+        const sort: any = filters.selectValue === 'date' ? { createdAt: -1 } : {};
 
         const jobs = await Job.find(query)
-            // .sort(sort)
-            // .skip(skip)
-            // .limit(limit);
+            .sort(sort)
+        // .skip(skip)
+        // .limit(limit);
 
         const totalJobs = await Job.countDocuments();
 
@@ -90,7 +91,6 @@ export const getAllJobs = async (req: Request, res: Response) => {
         });
     }
 };
-
 
 export const getSingleJob = async (req: Request, res: Response) => {
     try {

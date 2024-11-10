@@ -196,7 +196,7 @@ export default function JobPostingForm() {
                                 <SelectContent>
                                     <SelectItem value="Senior">Senior</SelectItem>
                                     <SelectItem value="Internship">Internship</SelectItem>
-                                    <SelectItem value="Enty Level">Enty Level</SelectItem>
+                                    <SelectItem value="Entry Level">Entry Level</SelectItem>
                                 </SelectContent>
                             </Select>
                             {errors && (

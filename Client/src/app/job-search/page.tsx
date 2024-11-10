@@ -25,6 +25,10 @@ export default function JobSearchPage() {
     const { jobs, page, hasMore, jobLoading, totalJobs } = useAppSelector(state => state.jobs);
     const { user } = useAppSelector(state => state.user);
     const [newJobs, setNewJobs] = useState<Job[]>([]);
+    const [srchInputs, setSrchInputs] = useState({
+        location: '',
+        search: '',
+    })
 
     const [jobFilters, setJobFilters] = useState<JobFilters>({
         location: 'all',
@@ -53,14 +57,16 @@ export default function JobSearchPage() {
         setNewJobs([]);
         dispatch(setJobLoading(true));
         dispatch(setJobFiltersState(jobFilters));
+        dispatch(incrementPage(1));
+        dispatch(setHasMore(true));
         console.log('changed');
     }, [jobFilters])
 
     useEffect(() => {
-        if (jobFilters.searchInputs.search === '' && jobFilters.searchInputs.location === '') {
-            // applyFilters();
+        if (srchInputs.search === '' && srchInputs.location === '') {
+            onChangeJobFilters('searchInputs', { ...srchInputs });
         }
-    }, [jobFilters.searchInputs]);
+    }, [srchInputs]);
 
     const loadMoreJobs = () => {
         dispatch(incrementPage(page + 1));
@@ -160,7 +166,7 @@ export default function JobSearchPage() {
         search: string;
     }
 
-    const onChangeJobFilters = (name: string, value: string | string[] | searchInputsInterface) => {
+    const onChangeJobFilters = (name: string, value: string | string[] | searchInputsInterface | undefined) => {
         setJobFilters({
             ...jobFilters,
             [name]: value
@@ -173,7 +179,13 @@ export default function JobSearchPage() {
     }
 
     const filterLocation = (value: string) => {
-        onChangeJobFilters('location', value);
+        if (value === 'near-me') {
+
+            onChangeJobFilters('location', user?.city);
+        } else {
+            onChangeJobFilters('location', value);
+        }
+
     };
 
     const filterTime = (value: string) => {
@@ -199,9 +211,15 @@ export default function JobSearchPage() {
             onChangeJobFilters('selectedJobTypes', filteredJobTypes);
         } else {
             // setSelectedJobTypes([...selectedJobTypes, jobType]);
-            onChangeJobFilters('selectedJobTypes', [...jobFilters.selectedJobTypes, jobType]);
+            if (jobFilters.selectedJobTypes.includes('')) {
+                onChangeJobFilters('selectedJobTypes', [jobType]);
+            } else {
+                onChangeJobFilters('selectedJobTypes', [...jobFilters.selectedJobTypes, jobType]);
+            }
         }
     };
+
+    console.log(jobFilters)
 
     const isChecked = (jobType: string) => {
         return jobFilters.selectedJobTypes.includes(jobType);
@@ -209,12 +227,13 @@ export default function JobSearchPage() {
 
     const changeSearchHandler = (e: ChangeEvent<HTMLInputElement>) => {
         const { name, value } = e.target;
-        onChangeJobFilters('searchInputs', { ...jobFilters.searchInputs, [name]: value });
+        setSrchInputs({ ...srchInputs, [name]: value });
     }
 
     const submitSearchHandler = (e: FormEvent<HTMLFormElement>) => {
         e.preventDefault();
-        applyFilters();
+        onChangeJobFilters('searchInputs', { ...srchInputs })
+        // applyFilters();
     }
 
     const selectValueChange = (value: string) => {
@@ -232,9 +251,9 @@ export default function JobSearchPage() {
                 </p>
 
                 <form onSubmit={submitSearchHandler} className="flex flex-col md:flex-row mb-8 relative">
-                    <Input name='search' value={jobFilters.searchInputs.search} onChange={changeSearchHandler} className="flex-grow pl-10 rounded-r-none" placeholder="What position are you looking for?" />
+                    <Input name='search' value={srchInputs.search} onChange={changeSearchHandler} className="flex-grow pl-10 rounded-r-none" placeholder="What position are you looking for?" />
                     <Search className="absolute inset-y-2 top-3 left-2 text-gray-400 pointer-events-none" />
-                    <Input name='location' value={jobFilters.searchInputs.location} onChange={changeSearchHandler} className="md:w-[50%] rounded-none border-l-0" placeholder="Location (city name)" />
+                    <Input name='location' value={srchInputs.location} onChange={changeSearchHandler} className="md:w-[50%] rounded-none border-l-0" placeholder="Location (city name)" />
                     <Button type='submit' className="md:w-1/6 rounded-l-none h-12">Search Jobs</Button>
                 </form>
 
@@ -258,7 +277,7 @@ export default function JobSearchPage() {
                                                 <Label htmlFor="near-me">Near me</Label>
                                             </div>
                                             <div className="flex items-center space-x-2">
-                                                <RadioGroupItem value="remote" id="remote-jobs" />
+                                                <RadioGroupItem value="Remote" id="remote-jobs" />
                                                 <Label htmlFor="remote-jobs">Remote jobs</Label>
                                             </div>
                                         </RadioGroup>
@@ -311,15 +330,15 @@ export default function JobSearchPage() {
                                                 <Label htmlFor="any-experience">Any experience</Label>
                                             </div>
                                             <div className="flex items-center space-x-2">
-                                                <RadioGroupItem value="senior" id="senior" />
+                                                <RadioGroupItem value="Senior" id="senior" />
                                                 <Label htmlFor="senior">Senior</Label>
                                             </div>
                                             <div className="flex items-center space-x-2">
-                                                <RadioGroupItem value="internship" id="internship" />
+                                                <RadioGroupItem value="Internship" id="internship" />
                                                 <Label htmlFor="internship">Internship</Label>
                                             </div>
                                             <div className="flex items-center space-x-2">
-                                                <RadioGroupItem value="entry-level" id="entry-level" />
+                                                <RadioGroupItem value="Entry level" id="entry-level" />
                                                 <Label htmlFor="entry-level">Entry level</Label>
                                             </div>
                                         </RadioGroup>
@@ -329,18 +348,18 @@ export default function JobSearchPage() {
                                         <h3 className="font-semibold mb-2">Type of employment</h3>
                                         <div className="space-y-2">
                                             <div className="flex items-center">
-                                                <Checkbox id="full-time" checked={isChecked("full-time")}
-                                                    onClick={() => toggleJobType("full-time")} />
+                                                <Checkbox id="full-time" checked={isChecked("Full Time")}
+                                                    onClick={() => toggleJobType("Full Time")} />
                                                 <label htmlFor="full-time" className="ml-2">Full-time</label>
                                             </div>
                                             <div className="flex items-center">
-                                                <Checkbox id="part-time" checked={isChecked("part-time")}
-                                                    onClick={() => toggleJobType("part-time")} />
+                                                <Checkbox id="part-time" checked={isChecked("Part Time")}
+                                                    onClick={() => toggleJobType("Part Time")} />
                                                 <label htmlFor="part-time" className="ml-2">Part-time</label>
                                             </div>
                                             <div className="flex items-center">
-                                                <Checkbox id="contract" checked={isChecked("contract")}
-                                                    onClick={() => toggleJobType("contract")} />
+                                                <Checkbox id="contract" checked={isChecked("Contract")}
+                                                    onClick={() => toggleJobType("Contract")} />
                                                 <label htmlFor="contract" className="ml-2">Contract</label>
                                             </div>
                                         </div>
@@ -374,10 +393,17 @@ export default function JobSearchPage() {
                                 loader={jobLoading && Array(6).fill(0).map((_, index) => <JobCardSkeleton key={index} />)}
                                 endMessage={<p className='text-center text-gray-600'>No more jobs to load</p>}>
                                 {
-                                    newJobs.length > 0 ? (
-                                        newJobs?.map((job, index) => (
-                                            <JobCard job={job} key={index} />
-                                        )))
+                                    jobs.length > 0 ? (
+                                        newJobs.length > 0 ? (
+                                            newJobs?.map((job, index) => (
+                                                <JobCard job={job} key={index} />
+                                            ))
+                                        )
+                                            :
+                                            (
+                                                Array(6).fill(0).map((_, index) => <JobCardSkeleton key={index} />)
+                                            )
+                                    )
                                         :
                                         (
                                             !jobLoading && (<div className='my-10 text-xl font-semibold text-center'>No Results Found!</div>)

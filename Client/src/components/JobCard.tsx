@@ -12,7 +12,7 @@ interface JobCardProps {
 
 const JobCard: React.FC<JobCardProps> = ({ job }) => {
     return (
-        <Card className='rounded-md my-5'>
+        <Card className='rounded-md my-5 group'>
             <CardContent className="flex items-start p-6">
                 <div className="w-12 h-12 bg-gray-200 rounded-full mr-4 flex-shrink-0"></div>
                 <div className="flex-grow">
@@ -22,7 +22,7 @@ const JobCard: React.FC<JobCardProps> = ({ job }) => {
                             <h3 className="font-semibold text-lg">{job.jobTitle}</h3>
                         </div>
                         <Link href={`/job-details/${job._id}`}>
-                            <Button variant="outline" className="text-sm text-primary hover:text-primary">View Details</Button>
+                            <Button variant="outline" className="text-sm text-primary hover:text-primary opacity-0 group-hover:opacity-100 transition duration-300">View Details</Button>
                         </Link>
                     </div>
                     <div className="flex flex-wrap justify-between pr-5 mt-2">
