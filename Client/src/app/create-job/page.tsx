@@ -13,6 +13,7 @@ import { ChangeEvent, FormEvent, useEffect, useState } from "react";
 import { useRouter } from 'next/navigation';
 import ResPointsList from "@/components/ResPointsList"
 import ReqPointsList from "@/components/ReqPointsList"
+import toast from "react-hot-toast";
 
 export default function JobPostingForm() {
     const [input, setInput] = useState<jobPostSchemaType>({
@@ -147,6 +148,7 @@ export default function JobPostingForm() {
         if (!inputResult.success) {
             const fieldErrors = inputResult.error.formErrors.fieldErrors;
             setErrors(fieldErrors as Partial<jobPostSchemaType>);
+            toast.error('All fields must be filled.');
             return;
         }
 
@@ -161,18 +163,18 @@ export default function JobPostingForm() {
     return (
         <MainLayout>
             <h1 className='w-ful text-2xl font-semibold text-center bg-gray-100 py-6'>Create a Job</h1>
-            <div className="container max-w-5xl my-5 mx-auto p-6 bg-white shadow-lg rounded-lg">
+            <div className="container max-w-5xl my-5 mx-auto p-6 bg-white rounded-lg">
                 <form className="space-y-6" onSubmit={inputSubmitHandler}>
                     <div className="grid grid-cols-2 gap-6">
                         <div className="space-y-2">
-                            <Label htmlFor="company-name">Company Name</Label>
+                            <Label htmlFor="company-name">Company Name <span className="text-red-600">*</span></Label>
                             <Input id="company-name" onChange={changeEventHandler} name="companyName" value={input.companyName} placeholder="Company Name" />
                             {errors && (
                                 <span className="text-xs text-red-500">{errors.companyName}</span>
                             )}
                         </div>
                         <div className="space-y-2">
-                            <Label htmlFor="company-website">Company Website</Label>
+                            <Label htmlFor="company-website">Company Website <span className="text-red-600">*</span></Label>
                             <Input id="company-website" onChange={changeEventHandler} name="websiteLink" value={input.websiteLink} placeholder="Website Link" />
                             {errors && (
                                 <span className="text-xs text-red-500">{errors.websiteLink}</span>
@@ -180,7 +182,7 @@ export default function JobPostingForm() {
                         </div>
                     </div>
                     <div className="space-y-2">
-                        <Label htmlFor="job-title">Job Title</Label>
+                        <Label htmlFor="job-title">Job Title <span className="text-red-600">*</span></Label>
                         <Input id="job-title" onChange={changeEventHandler} name="jobTitle" value={input.jobTitle} placeholder="Title" />
                         {errors && (
                             <span className="text-xs text-red-500">{errors.jobTitle}</span>
@@ -188,7 +190,7 @@ export default function JobPostingForm() {
                     </div>
                     <div className="grid grid-cols-2 gap-6">
                         <div className="space-y-2">
-                            <Label htmlFor="work-experience">Work Experience</Label>
+                            <Label htmlFor="work-experience">Work Experience <span className="text-red-600">*</span></Label>
                             <Select name="workExperience" onValueChange={(e) => selectValueChange(e, 'workExperience')}>
                                 <SelectTrigger id="work-experience">
                                     <SelectValue placeholder="----Select Experience----" />
@@ -204,7 +206,7 @@ export default function JobPostingForm() {
                             )}
                         </div>
                         <div className="space-y-2">
-                            <Label htmlFor="salary">Salary</Label>
+                            <Label htmlFor="salary">Salary <span className="text-red-600">*</span></Label>
                             <Select name="salary" onValueChange={(e) => selectValueChange(e, 'salary')}>
                                 <SelectTrigger id="salary">
                                     <SelectValue placeholder="----Select Salary----" />
@@ -222,7 +224,7 @@ export default function JobPostingForm() {
                     </div>
                     <div className="grid grid-cols-2 gap-6">
                         <div className="space-y-2">
-                            <Label htmlFor="job-category">Job Category</Label>
+                            <Label htmlFor="job-category">Job Category <span className="text-red-600">*</span></Label>
                             <Select name="jobCategory" onValueChange={(e) => selectValueChange(e, 'jobCategory')}>
                                 <SelectTrigger id="job-category">
                                     <SelectValue placeholder="----Select Category----" />
@@ -239,7 +241,7 @@ export default function JobPostingForm() {
                             )}
                         </div>
                         <div className="space-y-2">
-                            <Label htmlFor="job-type">Job Type</Label>
+                            <Label htmlFor="job-type">Job Type <span className="text-red-600">*</span></Label>
                             <Select name="jobType" onValueChange={(e) => selectValueChange(e, 'jobType')}>
                                 <SelectTrigger id="job-type">
                                     <SelectValue placeholder="----Select Type----" />
@@ -259,14 +261,14 @@ export default function JobPostingForm() {
 
                     <div className="grid grid-cols-2 gap-6">
                         <div className="space-y-2">
-                            <Label htmlFor="job-location">Job Location (Country)</Label>
+                            <Label htmlFor="job-location">Job Location (Country) <span className="text-red-600">*</span></Label>
                             <LocationSelector value={value} setValue={setValue} />
                             {errors && (
                                 <span className="text-xs text-red-500">{errors.jobLocationCountry}</span>
                             )}
                         </div>
                         <div className="space-y-2">
-                            <Label htmlFor="salary-range">Job Location (City)</Label>
+                            <Label htmlFor="salary-range">Job Location (City) <span className="text-red-600">*</span></Label>
                             <Input id="salary-range" onChange={changeEventHandler} name="jobLocationCity" value={input.jobLocationCity} placeholder="Job Location" />
                             {errors && (
                                 <span className="text-xs text-red-500">{errors.jobLocationCity}</span>
@@ -276,14 +278,14 @@ export default function JobPostingForm() {
 
                     <div className="grid grid-cols-2 gap-6">
                         <div className="space-y-2">
-                            <Label htmlFor="salary-range">Salary Range</Label>
+                            <Label htmlFor="salary-range">Salary Range <span className="text-red-600">*</span></Label>
                             <Input type="number" id="salary-range" onChange={changeEventHandler} name="salaryRange" value={input.salaryRange} placeholder="Salary Range" />
                             {errors && (
                                 <span className="text-xs text-red-500">{errors.salaryRange}</span>
                             )}
                         </div>
                         <div className="space-y-2">
-                            <Label htmlFor="experience">Experience <span className="text-gray-500">(e.g., 2 years, 6 months)</span></Label>
+                            <Label htmlFor="experience">Experience <span className="text-red-600">*</span> <span className="text-gray-500">(e.g., 2 years, 6 months)</span></Label>
                             <Input id="experience" onChange={changeEventHandler} name="experience" value={input.experience} placeholder="Experience" />
                             {errors && (
                                 <span className="text-xs text-red-500">{errors.experience}</span>
@@ -293,7 +295,7 @@ export default function JobPostingForm() {
 
                     <div className="grid grid-cols-2 gap-6">
                         <div className="space-y-2">
-                            <Label htmlFor="qualification">Qualification <span className="text-gray-500">(e.g., Matriculation, Intermediate, BSCS)</span></Label>
+                            <Label htmlFor="qualification">Qualification <span className="text-red-600">*</span> <span className="text-gray-500">(e.g., Matriculation, Intermediate, BSCS)</span></Label>
                             <Input id="qualification" onChange={changeEventHandler} name="qualification" value={input.qualification} placeholder="Qualification" />
                             {errors && (
                                 <span className="text-xs text-red-500">{errors.qualification}</span>
@@ -301,7 +303,7 @@ export default function JobPostingForm() {
                         </div>
 
                         <div className="space-y-2">
-                            <Label htmlFor="application-deadline">Application Deadline</Label>
+                            <Label htmlFor="application-deadline">Application Deadline <span className="text-red-600">*</span></Label>
                             <DatePicker date={date} setDate={setDate} />
                             {errors && (
                                 <span className="text-xs text-red-500">{errors.applicationDeadline}</span>
@@ -309,7 +311,7 @@ export default function JobPostingForm() {
                         </div>
                     </div>
                     <div className="space-y-2">
-                        <Label className="font-semibold text-[18px]" htmlFor="job-description">Job Description</Label>
+                        <Label className="font-semibold text-[18px]" htmlFor="job-description">Job Description <span className="text-red-600">*</span></Label>
                         <Textarea id="job-description" onChange={changeEventHandler} name="jobDescription" value={input.jobDescription} placeholder="Job Description" className="h-32" />
                         {errors && (
                             <span className="text-xs text-red-500">{errors.jobDescription}</span>
@@ -317,7 +319,7 @@ export default function JobPostingForm() {
                     </div>
 
                     <div className="space-y-2">
-                        <Label className="font-semibold text-[18px]" htmlFor="requirements">Requirements</Label>
+                        <Label className="font-semibold text-[18px]" htmlFor="requirements">Requirements <span className="text-red-600">*</span></Label>
                         <ReqPointsList input={input} setInput={setInput} errorHandler={errorHandler} />
                         {errors && (
                             <span className="text-xs text-red-500">{errors.requirements}</span>
@@ -325,7 +327,7 @@ export default function JobPostingForm() {
                     </div>
 
                     <div className="space-y-2">
-                        <Label className="font-semibold text-[18px]" htmlFor="responsibilities">Responsibilities</Label>
+                        <Label className="font-semibold text-[18px]" htmlFor="responsibilities">Responsibilities <span className="text-red-600">*</span></Label>
                         <ResPointsList input={input} setInput={setInput} errorHandler={errorHandler} />
                         {errors && (
                             <span className="text-xs text-red-500">{errors.responsibilities}</span>

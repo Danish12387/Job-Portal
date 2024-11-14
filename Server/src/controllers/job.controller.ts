@@ -45,14 +45,10 @@ export const getAllJobs = async (req: Request, res: Response) => {
 
         if (filters.salary && filters.salary !== 'all') {
             query.salary = filters.salary;
-        } else {
-            delete query.salary;
         }
 
         if (filters.workExperience && filters.workExperience !== 'any') {
             query.workExperience = filters.workExperience;
-        } else {
-            delete query.workExperience;
         }
 
         if (filters.selectedJobTypes && filters.selectedJobTypes.length > 0 && !filters.selectedJobTypes.includes('')) {
@@ -62,6 +58,7 @@ export const getAllJobs = async (req: Request, res: Response) => {
         if (filters.searchInputs?.search) {
             query.jobTitle = new RegExp(filters.searchInputs.search, 'i');
         }
+
         if (filters.searchInputs?.location) {
             query.jobLocationCity = new RegExp(filters.searchInputs.location, 'i');
         }
@@ -70,10 +67,10 @@ export const getAllJobs = async (req: Request, res: Response) => {
 
         const jobs = await Job.find(query)
             .sort(sort)
-        // .skip(skip)
-        // .limit(limit);
+            .skip(skip)
+            .limit(limit);
 
-        const totalJobs = await Job.countDocuments();
+        const totalJobs = await Job.countDocuments(query);
 
         return res.status(200).json({
             success: true,
@@ -91,6 +88,23 @@ export const getAllJobs = async (req: Request, res: Response) => {
         });
     }
 };
+
+export const getJobs = async (_: Request, res: Response) => {
+    try {
+        const jobs = await Job.find().sort({ createdAt: -1 }).limit(6);
+        return res.status(200).json({
+            success: true,
+            message: "Jobs fetched successfully",
+            homeJobs: jobs
+        })
+    } catch (error) {
+        console.error(error);
+        return res.status(500).json({
+            success: false,
+            message: "Internal Server Error",
+        });
+    }
+}
 
 export const getSingleJob = async (req: Request, res: Response) => {
     try {
@@ -110,3 +124,25 @@ export const getSingleJob = async (req: Request, res: Response) => {
         });
     }
 };
+
+export const getSearchedJobs = async (req: Request, res: Response) => {
+    try {
+        const query = req.query.q as string;
+        const searchFilter = {
+            jobTitle: { $regex: query, $options: 'i' }
+        };
+        const jobs = await Job.find(searchFilter);
+        return res.status(200).json({
+            success: true,
+            message: "Jobs fetched successfully",
+            job: jobs || { jobTitle: 'No results found.' }
+        })
+
+    } catch (error) {
+        console.error(error);
+        return res.status(500).json({
+            success: false,
+            message: "Internal Server Error",
+        });
+    }
+}

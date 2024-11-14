@@ -2,16 +2,24 @@
 import MainLayout from "@/components/MainLayout";
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input";
-import { Search } from "lucide-react";
+import { MoveRight, Search } from "lucide-react";
 import Image from "next/image";
 import { NextPage } from "next";
 import Link from "next/link";
-import { createJob } from "@/utils/apiHandlers";
+import { createJob, getSearchedJobs, Job } from "@/utils/apiHandlers";
 import { useAppSelector } from "@/lib/hooks";
+import useGetHomeJobs from "@/hooks/useGetHomeJobs";
+import { useState } from "react";
+import { useRouter } from 'next/navigation';
 
 const Home: NextPage = () => {
   const { homeJobs } = useAppSelector(state => state.jobs);
-  const categories = Array(10).fill('Technology')
+  const [isOpen, setIsOpen] = useState(false);
+  const [searchTerm, setSearchTerm] = useState('');
+  const [searchJobs, setSearchJobs] = useState([]);
+  const router = useRouter();
+  const categories = Array(10).fill('Technology');
+
   const jobs = Array(5).fill({
     title: 'Fresher UI/UX Designer (1 Year Exp.)',
     company: 'Woo Creative',
@@ -19,6 +27,21 @@ const Home: NextPage = () => {
     salary: '$14K - $25K',
     type: 'Full Time',
   })
+
+  useGetHomeJobs();
+
+  const handleInputChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    setSearchTerm(e.target.value);
+    setIsOpen(e.target.value.length > 0);
+    const res = await getSearchedJobs(e.target.value);
+    setSearchJobs(res?.job);
+  }
+
+  const handleSearch = () => {
+    if (searchTerm) {
+      router.push(`/job-search?q=${searchTerm}`);
+    }
+  }
 
   const boomData = [
     {
@@ -248,9 +271,37 @@ const Home: NextPage = () => {
                     className="px-10 h-full text-[16px] bg-white rounded-r-none border-none focus-visible:ring-transparent"
                     type="text"
                     placeholder="Search by job title"
+                    value={searchTerm}
+                    onChange={handleInputChange}
+                    aria-label="Search by job title"
                   />
                   <Search className="absolute inset-y-2 top-3 left-2 text-gray-500 pointer-events-none" />
-                  <Button className="h-full rounded-l-none">Search</Button>
+                  <Button className="h-full rounded-l-none" onClick={handleSearch}>Search</Button>
+                  {isOpen && (
+                    <div className="absolute top-12 z-10 w-[84%] bg-white border border-gray-200 rounded-b-md shadow-lg max-h-60 overflow-y-auto">
+                      {searchJobs?.map((job: Job, index) => (
+                        <div
+                          key={index}
+                          className="px-6 py-2 hover:bg-gray-100 cursor-pointer border-b border-gray-200 group"
+                          onClick={() => {
+                            setSearchTerm(`${job?.jobTitle}`)
+                            setIsOpen(false)
+                          }}
+                        >
+                          <Link
+                            href={`/job-details/${job?._id}`}
+                            className="relative"
+                          >
+                            <div>
+                              <h1 className="text-[16px] font-semibold">{job?.jobTitle}</h1>
+                              <p className="text-sm text-gray-500 line-clamp-1">{job?.jobDescription}</p>
+                            </div>
+                            <MoveRight className="opacity-0 group-hover:opacity-100 group-hover:translate-x-3 absolute right-0 top-1 h-5 text-primary transition duration-300" />
+                          </Link>
+                        </div>
+                      ))}
+                    </div>
+                  )}
                 </div>
               </div>
             </div>
@@ -276,7 +327,7 @@ const Home: NextPage = () => {
         <section className="container mx-auto py-10">
           <h2 className="text-2xl md:text-3xl text-center font-bold mb-10">All Popular Listed Jobs</h2>
           <div className="space-y-4">
-            {homeJobs.map((job, index) => (
+            {homeJobs?.map((job, index) => (
               <div key={index} className="shadow rounded-lg p-6 bg-white flex sm:flex-row flex-col md:gap-0 gap-10 items-center justify-between">
                 <div className="flex items-center space-x-4">
                   <div className="w-12 h-12 bg-primary rounded-full flex items-center justify-center text-white font-bold text-xl">

@@ -28,35 +28,33 @@ const useGetAllJobs = () => {
                     withCredentials: true,
                 });
                 if (res.data.success) {
-                    setTimeout(() => {
-                        if (page === 1) {
-                            dispatch(setJobs(res.data.jobs));
-                            const homejobs = res.data.jobs.slice(0, 6);
-                            dispatch(setHomeJobs(homejobs));
-                        } else {
-                            // const shuffledItems = shuffleArray([...res.data.jobs]);
+                    setTimeout(async () => {
+                        // const shuffledItems = shuffleArray([...res.data.jobs]);
+                        await new Promise<void>((resolve) => {
                             dispatch(setJobs([...jobs, ...res.data.jobs]));
-                        }
+                            resolve();
+                        });
+                        dispatch(setJobLoading(false));
                         dispatch(setJobsCount(res.data.totalJobs));
 
-                        // if (res.data.totalPages <= res.data.currentPage) {
-                        dispatch(setHasMore(false));
-                        // }
-                    }, 100);
+                        if (res.data.totalPages <= res.data.currentPage) {
+                            dispatch(setHasMore(false));
+                        }
+                    }, 200);
                 }
             } catch (error) {
                 console.log(error);
             } finally {
                 setTimeout(() => {
                     dispatch(setJobLoading(false));
-                }, 2000);
+                }, 1500);
             }
         }
-        fetchJobs();
-        // if (hasMore) {
-        // } else {
-        //     dispatch(setJobLoading(false));
-        // }
+        if (hasMore) {
+            fetchJobs();
+        } else {
+            dispatch(setJobLoading(false));
+        }
     }, [page, hasMore, jobFiltersState])
 }
 

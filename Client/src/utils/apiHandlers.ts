@@ -112,11 +112,24 @@ export async function createJob(data: jobPostSchemaType): Promise<JobResponseDat
 
         if (res.data.success) {
             toast.success(res.data.message);
-            // console.log("Success");
             return res.data;
         }
     } catch (error: any) {
         console.log(error);
         toast.error(error?.response?.data?.message);
+    }
+}
+
+export async function getSearchedJobs(query: string) {
+    try {
+        const res = await axios.get(`${API_END_POINT}/job/searchedJobs?q=${query}`);
+
+        if (res.data.success) {
+            return res.data;
+        }
+
+    } catch (error: any) {
+        console.log(error);
+        toast.error(error?.response?.data?.message || 'Something went wrong');
     }
 }
