@@ -9,9 +9,10 @@ export interface User {
     email: string;
     city: string;
     country: string;
-    lastLogin: string;
-    createdAt: string;
-    updatedAt: string;
+    lastLogin: Date;
+    jobs?: Job[];
+    createdAt: Date;
+    updatedAt: Date;
     __v: number;
 }
 
@@ -39,8 +40,8 @@ export interface Job {
     salary: string;
     requirements: string[];
     responsibilities: string[];
-    createdAt: string;
-    updatedAt: string;
+    createdAt: Date;
+    updatedAt: Date;
     __v: number;
 }
 
@@ -128,6 +129,18 @@ export async function getSearchedJobs(query: string) {
             return res.data;
         }
 
+    } catch (error: any) {
+        console.log(error);
+        toast.error(error?.response?.data?.message || 'Something went wrong');
+    }
+}
+
+export async function getUserDetails(slug: string): Promise<UserResponseData | undefined> {
+    try {
+        const res = await axios.get(`${API_END_POINT}/user/${slug}/details/`);
+        if (res.data.success) {
+            return res.data;
+        }
     } catch (error: any) {
         console.log(error);
         toast.error(error?.response?.data?.message || 'Something went wrong');

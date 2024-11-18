@@ -32,6 +32,8 @@ export default function JobSearchPage() {
         search: '',
     });
 
+    console.log(jobs);
+
     const [jobFilters, setJobFilters] = useState<JobFilters>({
         location: 'all',
         time: 'all-time',

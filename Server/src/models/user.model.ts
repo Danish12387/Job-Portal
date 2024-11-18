@@ -1,4 +1,4 @@
-import mongoose, { Document, Model } from "mongoose";
+import mongoose, { Document, Model, Types } from "mongoose";
 import bcrypt from 'bcryptjs';
 
 interface IUser {
@@ -8,6 +8,7 @@ interface IUser {
     city: string;
     country: string;
     lastLogin?: Date;
+    jobs?: Types.ObjectId[],
 }
 
 export interface IUserDocument extends IUser, Document {
@@ -39,7 +40,14 @@ const userSchema = new mongoose.Schema<IUserDocument>({
     lastLogin: {
         type: Date,
         default: Date.now
-    }
+    },
+    jobs: [
+        {
+            type: mongoose.Schema.Types.ObjectId,
+            ref: 'jobs'
+
+        }
+    ],
 }, { timestamps: true });
 
 userSchema.pre('save', function (next) {

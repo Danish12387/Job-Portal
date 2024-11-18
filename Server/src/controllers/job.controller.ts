@@ -1,10 +1,21 @@
 import { Request, Response } from "express";
 import { Job } from "../models/job.model";
+import mongoose from "mongoose";
+import { User } from "../models/user.model";
 
 export const createJob = async (req: Request, res: Response) => {
     try {
         const data = req.body;
-        const job = await Job.create(data);
+        const authorId = req.id;
+        const job = await Job.create({
+            ...data,
+            author: new mongoose.Types.ObjectId(authorId),
+        });
+
+        await User.findByIdAndUpdate(authorId, {
+            $push: { jobs: job._id },
+        });
+
         return res.status(201).json({
             success: true,
             message: "Job created successfully",
@@ -68,7 +79,8 @@ export const getAllJobs = async (req: Request, res: Response) => {
         const jobs = await Job.find(query)
             .sort(sort)
             .skip(skip)
-            .limit(limit);
+            .limit(limit)
+            .populate({ path: 'author', select: '-password' });
 
         const totalJobs = await Job.countDocuments(query);
 
@@ -109,7 +121,7 @@ export const getJobs = async (_: Request, res: Response) => {
 export const getSingleJob = async (req: Request, res: Response) => {
     try {
         const jobId = req.params.id;
-        const job = await Job.findById(jobId);
+        const job = await Job.findById(jobId).populate({ path: 'author', select: '-password' });
 
         return res.status(200).json({
             success: true,

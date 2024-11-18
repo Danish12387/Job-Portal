@@ -64,7 +64,7 @@ export default function AuthNavbar() {
             <DropdownMenuContent className='w-48'>
               <DropdownMenuLabel>My Account</DropdownMenuLabel>
               <DropdownMenuSeparator />
-              <DropdownMenuItem>Profile</DropdownMenuItem>
+              <Link href={`/profile/${user?._id}`}><DropdownMenuItem>Profile</DropdownMenuItem></Link>
               <DropdownMenuItem>Billing</DropdownMenuItem>
               <DropdownMenuItem>Team</DropdownMenuItem>
               <DropdownMenuItem>Subscription</DropdownMenuItem>

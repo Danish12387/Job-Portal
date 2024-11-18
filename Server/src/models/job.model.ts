@@ -1,4 +1,4 @@
-import mongoose, { Document, Model } from "mongoose";
+import mongoose, { Document, Model, Types } from "mongoose";
 
 interface IJob {
     companyName: string,
@@ -17,6 +17,7 @@ interface IJob {
     salary: string,
     requirements: string[],
     responsibilities: string[],
+    author: Types.ObjectId,
 }
 
 export interface IJobDocument extends IJob, Document {
@@ -87,6 +88,11 @@ const jobSchema = new mongoose.Schema({
     },
     responsibilities: {
         type: Array,
+        required: true
+    },
+    author: {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'users',
         required: true
     },
 }, { timestamps: true });
