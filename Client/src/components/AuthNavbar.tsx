@@ -58,7 +58,7 @@ export default function AuthNavbar() {
                   <AvatarImage src="https://github.com/shadcn.png" alt="User avatar" />
                   <AvatarFallback>CN</AvatarFallback>
                 </Avatar>
-                <span className="hidden md:inline max-w-48 truncate">{user?.fullname}</span>
+                <span className="hidden md:inline max-w-32 truncate">{user?.fullname}</span>
               </div>
             </DropdownMenuTrigger>
             <DropdownMenuContent className='w-48'>

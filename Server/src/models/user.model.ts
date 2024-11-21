@@ -12,6 +12,13 @@ interface IUser {
     headline?: string,
     websiteLink?: string,
     linkText?: string,
+    about?: string,
+    hobbies?: string[],
+    languages?: string[];
+    pronouns?: string;
+    nickname?: string;
+    workHistory?: string[];
+    education?: string;
 }
 
 export interface IUserDocument extends IUser, Document {
@@ -62,7 +69,35 @@ const userSchema = new mongoose.Schema<IUserDocument>({
     linkText: {
         type: String,
         default: ''
-    }
+    },
+    about: {
+        type: String,
+        default: ''
+    },
+    hobbies: {
+        type: [String],
+        default: []
+    },
+    languages: {
+        type: [String],
+        default: []
+    },
+    pronouns: {
+        type: String,
+        default: ''
+    },
+    nickname: {
+        type: String,
+        default: ''
+    },
+    workHistory: {
+        type: [String],
+        default: []
+    },
+    education: {
+        type: String,
+        default: ''
+    },
 }, { timestamps: true });
 
 userSchema.pre('save', function (next) {

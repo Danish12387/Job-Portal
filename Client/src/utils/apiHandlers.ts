@@ -1,3 +1,4 @@
+import { AdditionalDetailsState } from "@/components/EditAdditionalDetailsDialog";
 import { jobPostSchemaType } from "@/schema/jobSchema";
 import { ProfileEditState } from "@/schema/updateProfile";
 import { LoginInputState, SignupInputState } from "@/schema/userSchema";
@@ -13,8 +14,15 @@ export interface User {
     lastLogin: Date;
     jobs?: Job[];
     headline?: string;
-    websiteLink?: string,
-    linkText?: string,
+    websiteLink?: string;
+    linkText?: string;
+    about?: string;
+    hobbies?: string[];
+    languages?: string[];
+    pronouns?: string;
+    nickname?: string;
+    workHistory?: string[];
+    education?: string;
     createdAt: Date;
     updatedAt: Date;
     __v: number;
@@ -154,6 +162,57 @@ export async function getUserDetails(slug: string): Promise<UserResponseData | u
 export async function editProfile(data: ProfileEditState): Promise<UserResponseData | undefined> {
     try {
         const res = await axios.post(`${API_END_POINT}/user/edit-profile`, data, {
+            headers: {
+                'Content-Type': 'application/json'
+            }
+        });
+        if (res.data.success) {
+            toast.success(res.data.message);
+            return res.data;
+        }
+    } catch (error: any) {
+        console.log(error);
+        toast.error(error?.response?.data?.message || 'Something went wrong');
+    }
+}
+
+export async function editProfileAbout(data: string): Promise<UserResponseData | undefined> {
+    try {
+        const res = await axios.post(`${API_END_POINT}/user/edit-profile-about`, { about: data }, {
+            headers: {
+                'Content-Type': 'application/json'
+            }
+        });
+        if (res.data.success) {
+            toast.success(res.data.message);
+            return res.data;
+        }
+    } catch (error: any) {
+        console.log(error);
+        toast.error(error?.response?.data?.message || 'Something went wrong');
+    }
+}
+
+export async function editHobbies(data: string[]): Promise<UserResponseData | undefined> {
+    try {
+        const res = await axios.post(`${API_END_POINT}/user/edit-hobbies`, { hobbies: data }, {
+            headers: {
+                'Content-Type': 'application/json'
+            }
+        });
+        if (res.data.success) {
+            toast.success(res.data.message);
+            return res.data;
+        }
+    } catch (error: any) {
+        console.log(error);
+        toast.error(error?.response?.data?.message || 'Something went wrong');
+    }
+}
+
+export async function editAdditionalDetails(data: AdditionalDetailsState): Promise<UserResponseData | undefined> {
+    try {
+        const res = await axios.post(`${API_END_POINT}/user/edit-additional-details`, data, {
             headers: {
                 'Content-Type': 'application/json'
             }

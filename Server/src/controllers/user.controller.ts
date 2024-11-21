@@ -153,3 +153,122 @@ export const editProfile = async (req: Request, res: Response) => {
         return res.status(500).json({ message: "Internal Server Error" });
     }
 }
+
+export const editProfileAbout = async (req: Request, res: Response) => {
+    try {
+        const { about } = req.body;
+        const userId = req.id;
+        const user = await User.findById(userId).select("-password");
+        if (!user) {
+            return res.status(404).json({
+                success: false,
+                message: "User not found",
+                user: user
+            })
+        }
+
+        if (about) user.about = about;
+
+        await user.save();
+
+        return res.status(200).json({
+            success: true,
+            message: "About updated successfully",
+            user
+        });
+    } catch (error) {
+        console.log(error);
+        return res.status(500).json({ message: "Internal Server Error" });
+    }
+}
+
+export const editHobbies = async (req: Request, res: Response) => {
+    try {
+        const { hobbies } = req.body;
+        console.log(hobbies);
+        const userId = req.id;
+        const user = await User.findById(userId).select("-password");
+        if (!user) {
+            return res.status(404).json({
+                success: false,
+                message: "User not found",
+                user: user
+            })
+        }
+
+        if (hobbies) user.hobbies = hobbies;
+
+        await user.save();
+
+        return res.status(200).json({
+            success: true,
+            message: "Hobbies added successfully",
+            user
+        });
+    } catch (error) {
+        console.log(error);
+        return res.status(500).json({ message: "Internal Server Error" });
+    }
+}
+
+export const editAdditionalDetails = async (req: Request, res: Response) => {
+    try {
+        const { languages, pronouns, nickname, workHistory, education } = req.body;
+        const userId = req.id;
+        const user = await User.findById(userId).select("-password");
+        if (!user) {
+            return res.status(404).json({
+                success: false,
+                message: "User not found",
+                user: user
+            })
+        }
+
+        if (languages) {
+            user.languages = languages
+        } else {
+            user.languages = [];
+        }
+
+        if (workHistory) {
+            user.workHistory = workHistory
+        } else {
+            user.workHistory = [];
+        }
+
+        if (pronouns) {
+            user.pronouns = pronouns
+        } else {
+            user.pronouns = '';
+        }
+
+        if (nickname) {
+            user.nickname = nickname
+        } else {
+            user.nickname = '';
+        }
+
+        if (nickname) {
+            user.nickname = nickname
+        } else {
+            user.nickname = '';
+        }
+
+        if (education) {
+            user.education = education
+        } else {
+            user.education = '';
+        }
+
+        await user.save();
+
+        return res.status(200).json({
+            success: true,
+            message: "Profile updated successfully",
+            user
+        });
+    } catch (error) {
+        console.log(error);
+        return res.status(500).json({ message: "Internal Server Error" });
+    }
+}

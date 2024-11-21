@@ -9,12 +9,9 @@ import {
 } from "@/components/ui/dialog"
 import { CircleMinus, Edit2, Loader2 } from 'lucide-react';
 import { Button } from './ui/button';
-import { Input } from './ui/input';
 import { Label } from './ui/label';
-import { LocationSelector } from './LocationSelector';
-import { ProfileEditState, userProfileEdit } from '@/schema/updateProfile';
 import toast from 'react-hot-toast';
-import { editProfile, User } from '@/utils/apiHandlers';
+import { editProfileAbout, User } from '@/utils/apiHandlers';
 import { setUser } from '@/lib/features/user/userSlice';
 import { useAppDispatch } from '@/lib/hooks';
 import { useSearchParams, useRouter } from 'next/navigation';
@@ -34,20 +31,11 @@ const EditAboutDialog: React.FC<EditProfileDialogProps> = ({ userDetails, userId
     const [loading, setLoading] = useState<boolean>(false);
     const [isOpen, setIsOpen] = useState(false);
     const [showWarning, setShowWarning] = useState(false);
-    const [country, setCountry] = useState<string>(userDetails?.country || '');
-    const [errors, setErrors] = useState<Partial<ProfileEditState>>({});
-    const [profileForm, setProfileForm] = useState<ProfileEditState>({
-        fullname: userDetails?.fullname || '',
-        headline: userDetails?.headline || '',
-        country: userDetails?.country || '',
-        city: userDetails?.city || '',
-        websiteLink: userDetails?.websiteLink || '',
-        linkText: userDetails?.linkText || ''
-    });
-    const [initialForm, setInitialForm] = useState<ProfileEditState>(profileForm);
+    const [about, setAbout] = useState<string | undefined>(userDetails?.about);
+    const [initialForm, setInitialForm] = useState<string | undefined>(about);
 
     useEffect(() => {
-        const isEditing = searchParams.get('edit') === 'profile';
+        const isEditing = searchParams.get('edit') === 'about';
         setIsOpen(isEditing);
         if (!isEditing && isFormDirty()) {
             setShowWarning(true);
@@ -56,26 +44,21 @@ const EditAboutDialog: React.FC<EditProfileDialogProps> = ({ userDetails, userId
 
     useEffect(() => {
         if (userDetails) {
-            const newForm = {
-                fullname: userDetails.fullname || '',
-                headline: userDetails.headline || '',
-                country: userDetails.country || '',
-                city: userDetails.city || '',
-                websiteLink: userDetails.websiteLink || '',
-                linkText: userDetails.linkText || ''
-            };
-            setProfileForm(newForm);
-            setInitialForm(newForm);
-            setCountry(userDetails.country || '');
+            const newAbout = userDetails?.about || '';
+            setAbout(newAbout);
+            setInitialForm(newAbout);
         }
     }, [userDetails]);
 
+    const handleInputChange = (event: ChangeEvent<HTMLTextAreaElement>) => {
+        setAbout(event.target.value);
+    }
     const isFormDirty = () => {
-        return JSON.stringify(profileForm) !== JSON.stringify(initialForm);
+        return about !== initialForm;
     };
 
     const openDialog = () => {
-        router.push(`/profile/${userId}?edit=profile`);
+        router.push(`/profile/${userId}?edit=about`);
     };
 
     const closeDialog = () => {
@@ -87,7 +70,7 @@ const EditAboutDialog: React.FC<EditProfileDialogProps> = ({ userDetails, userId
     };
 
     const handleDiscard = () => {
-        setProfileForm(initialForm);
+        setAbout(initialForm);
         setShowWarning(false);
         router.push(`/profile/${userId}`);
     };
@@ -96,59 +79,12 @@ const EditAboutDialog: React.FC<EditProfileDialogProps> = ({ userDetails, userId
         setShowWarning(false);
     };
 
-    useEffect(() => {
-        if (country) {
-            setProfileForm((prevInput) => ({
-                ...prevInput,
-                country: country,
-            }));
-
-            setErrors((prevErrors: Partial<ProfileEditState>) => {
-                const newErrors = { ...prevErrors };
-                delete newErrors.country;
-                return newErrors;
-            })
-        }
-    }, [country])
-
-    const errorHandler = (name: string, value: string): void => {
-        setErrors((prevErrors: Partial<ProfileEditState>) => {
-            const newErrors = { ...prevErrors };
-
-            if (name === "fullname" && value.length >= 1) {
-                delete newErrors.fullname;
-            } else if (name === "headline" && value.length >= 1) {
-                delete newErrors.headline;
-            } else if (name === "city" && value.length >= 1) {
-                delete newErrors.city;
-            } else if (name === "websiteLink" && value.length >= 1) {
-                delete newErrors.websiteLink;
-            } else if (name === "linkText" && value.length >= 1) {
-                delete newErrors.linkText;
-            }
-            return newErrors;
-        });
-    }
-
-    const changeEventHandler = (e: ChangeEvent<HTMLInputElement>) => {
-        const { name, value } = e.target;
-        setProfileForm({ ...profileForm, [name]: value });
-        errorHandler(name, value);
-    }
-
     const handleSubmit = async (event: React.FormEvent) => {
         event.preventDefault();
-        const inputResult = userProfileEdit.safeParse(profileForm);
-        if (!inputResult.success) {
-            const fieldErrors = inputResult.error.formErrors.fieldErrors;
-            setErrors(fieldErrors as Partial<ProfileEditState>);
-            toast.error('All required fields must be filled.');
-            return;
-        }
-
+        if (!about) return toast.error('Fields cannot be empty.');
         try {
             setLoading(true);
-            const res = await editProfile(profileForm);
+            const res = await editProfileAbout(about);
             if (res && res.user) {
                 setUserDetails(res.user);
                 dispatch(setUser(res.user));
@@ -167,14 +103,13 @@ const EditAboutDialog: React.FC<EditProfileDialogProps> = ({ userDetails, userId
 
     return (
         <>
-            <Button onClick={openDialog} size="sm" variant="outline" className="text-green-600 border-green-600">
-                <Edit2 className="w-4 h-4 mr-2" />
-                Edit Profile
+            <Button onClick={openDialog} size="sm" variant="ghost" className="text-green-600">
+                <Edit2 className="w-4 h-4" />
             </Button>
             <Dialog open={isOpen} onOpenChange={closeDialog}>
-                <DialogContent className="max-w-[700px] max-h-[500px] h-[80%] border-none p-0">
+                <DialogContent className="max-w-[700px] max-h-[400px] h-[70%] border-none p-0">
                     <DialogHeader className='border-b w-full p-4 h-20'>
-                        <DialogTitle>Edit Profile</DialogTitle>
+                        <DialogTitle>Edit Profile About</DialogTitle>
                         <DialogDescription>
                             Make changes to your profile here. Click save when you're done.
                         </DialogDescription>
@@ -182,52 +117,10 @@ const EditAboutDialog: React.FC<EditProfileDialogProps> = ({ userDetails, userId
                     <form onSubmit={handleSubmit} className='overflow-y-auto'>
                         <div className="grid gap-4 p-6">
                             <div className="flex flex-col justify-between gap-2">
-                                <Label htmlFor="name" className="text-gray-700">
-                                    Name
+                                <Label htmlFor="name" className="font-semibold text-lg">
+                                    About
                                 </Label>
-                                <Textarea id="name" onChange={ } value={profileForm.fullname} name="fullname" className="col-span-3" placeholder="Full name" />
-                                {errors.fullname && (
-                                    <span className="text-xs flex items-center text-red-500"><CircleMinus className="w-4 h-4 mr-1" /> {errors.fullname}</span>
-                                )}
-                            </div>
-                            <div className="flex flex-col justify-between gap-2">
-                                <Label htmlFor="title" className="text-gray-700">
-                                    Headline
-                                </Label>
-                                <Input id="title" onChange={changeEventHandler} value={profileForm.headline} name="headline" className="col-span-3" placeholder="Enter your profile title" />
-                            </div>
-                            <div className="flex items-center gap-4">
-                                <div className="flex flex-col justify-between gap-2 w-2/4">
-                                    <Label htmlFor="location-country" className="w-[30%] text-gray-700">
-                                        Location
-                                    </Label>
-                                    <LocationSelector value={country} setValue={setCountry} />
-                                    {errors.country && (
-                                        <span className="text-xs flex items-center text-red-500"><CircleMinus className="w-4 h-4 mr-1" /> {errors.country}</span>
-                                    )}
-                                </div>
-                                <div className="flex flex-col justify-between gap-2 w-2/4">
-                                    <Label htmlFor="location-city" className="text-gray-700">
-                                        City
-                                    </Label>
-                                    <Input id="location-city" onChange={changeEventHandler} value={profileForm.city} name="city" className="col-span-3" placeholder="Enter your city name" />
-                                    {errors.city && (
-                                        <span className="text-xs flex items-center text-red-500"><CircleMinus className="w-4 h-4 mr-1" /> {errors.city}</span>
-                                    )}
-                                </div>
-                            </div>
-                            <h1 className='font-semibold text-[20px]'>Website</h1>
-                            <div className="flex flex-col justify-between gap-2">
-                                <Label htmlFor="website-link" className="text-gray-700">
-                                    Link
-                                </Label>
-                                <Input id="website-link" onChange={changeEventHandler} value={profileForm.websiteLink} name="websiteLink" className="col-span-3" placeholder="Enter your website link" />
-                            </div>
-                            <div className="flex flex-col justify-between gap-2">
-                                <Label htmlFor="website-text" className="text-gray-700">
-                                    Link text
-                                </Label>
-                                <Input id="website-text" onChange={changeEventHandler} value={profileForm.linkText} name="linkText" className="col-span-3" placeholder="Enter text for website link" />
+                                <Textarea id="name" value={about} onChange={handleInputChange} name="fullname" className="h-32" placeholder="Enter your about" />
                             </div>
                         </div>
                         <DialogFooter className='m-6'>
@@ -249,7 +142,7 @@ const EditAboutDialog: React.FC<EditProfileDialogProps> = ({ userDetails, userId
                     <AlertDialogHeader>
                         <AlertDialogTitle>Discard changes?</AlertDialogTitle>
                         <AlertDialogDescription>
-                            You have unsaved changes. Are you sure you want to discard them?
+                            You have unsaved changes in about. Are you sure you want to discard them?
                         </AlertDialogDescription>
                     </AlertDialogHeader>
                     <AlertDialogFooter>
