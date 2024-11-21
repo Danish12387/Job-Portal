@@ -1,4 +1,5 @@
 import { jobPostSchemaType } from "@/schema/jobSchema";
+import { ProfileEditState } from "@/schema/updateProfile";
 import { LoginInputState, SignupInputState } from "@/schema/userSchema";
 import axios from "axios";
 import toast from "react-hot-toast";
@@ -11,6 +12,9 @@ export interface User {
     country: string;
     lastLogin: Date;
     jobs?: Job[];
+    headline?: string;
+    websiteLink?: string,
+    linkText?: string,
     createdAt: Date;
     updatedAt: Date;
     __v: number;
@@ -139,6 +143,23 @@ export async function getUserDetails(slug: string): Promise<UserResponseData | u
     try {
         const res = await axios.get(`${API_END_POINT}/user/${slug}/details/`);
         if (res.data.success) {
+            return res.data;
+        }
+    } catch (error: any) {
+        console.log(error);
+        toast.error(error?.response?.data?.message || 'Something went wrong');
+    }
+}
+
+export async function editProfile(data: ProfileEditState): Promise<UserResponseData | undefined> {
+    try {
+        const res = await axios.post(`${API_END_POINT}/user/edit-profile`, data, {
+            headers: {
+                'Content-Type': 'application/json'
+            }
+        });
+        if (res.data.success) {
+            toast.success(res.data.message);
             return res.data;
         }
     } catch (error: any) {

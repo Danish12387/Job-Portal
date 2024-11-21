@@ -1,7 +1,7 @@
 'use client'
 import Link from "next/link"
 import Image from "next/image"
-import { Edit2, Plus, Bookmark } from "lucide-react"
+import { Edit2, Plus, Bookmark, ExternalLink } from "lucide-react"
 import { formatDistanceToNowStrict, format } from 'date-fns';
 import { Button } from "@/components/ui/button"
 import { Card } from "@/components/ui/card"
@@ -10,6 +10,8 @@ import { Badge } from "@/components/ui/badge"
 import MainLayout from "@/components/MainLayout";
 import { useEffect, useState } from "react"
 import { getUserDetails, User } from "@/utils/apiHandlers"
+import EditProfileDialog from "@/components/EditProfileDialog";
+import EditAboutDialog from "@/components/EditAboutDialog";
 
 export default function Component({ params }: { params: { slug: string } }) {
     const [userDetails, setUserDetails] = useState<User>();
@@ -24,8 +26,6 @@ export default function Component({ params }: { params: { slug: string } }) {
         fetchUserDetails();
     }, []);
 
-    console.log(userDetails?.createdAt);
-
     return (
         <MainLayout>
             <div className="w-full bg-white container mx-auto">
@@ -39,8 +39,8 @@ export default function Component({ params }: { params: { slug: string } }) {
                     />
                     <div className="absolute -bottom-16 left-8">
                         <Avatar className="w-32 h-32 border-4 border-white rounded-full">
-                            <AvatarImage src={'/dummy-person.jpg'} />
-                            <AvatarFallback>AR</AvatarFallback>
+                            <AvatarImage src={''} />
+                            <AvatarFallback><img src="/dummy-person.jpg" /></AvatarFallback>
                         </Avatar>
                     </div>
                 </div>
@@ -49,13 +49,11 @@ export default function Component({ params }: { params: { slug: string } }) {
                     <div className="mt-20 mb-6 flex justify-between items-start">
                         <div>
                             <h1 className="text-2xl font-semibold">{userDetails?.fullname}</h1>
-                            <p className="text-gray-600">VP of Customer Operations</p>
+                            {userDetails?.headline && <p className="">{userDetails?.headline}</p>}
                             <p className="text-gray-600 text-sm mt-1">{userDetails?.city}, {userDetails?.country}</p>
+                            {userDetails?.websiteLink && <a href={userDetails?.websiteLink} target="_blank" className="text-blue-700 w-auto hover:underline text-sm inline-flex items-center my-2">{userDetails?.linkText} <ExternalLink className="h-4 w-4 ml-2" /></a>}
                         </div>
-                        <Button size="sm" variant="outline" className="text-green-600 border-green-600">
-                            <Edit2 className="w-4 h-4 mr-2" />
-                            Edit Profile
-                        </Button>
+                        <EditProfileDialog userDetails={userDetails} userId={params.slug} setUserDetails={setUserDetails} />
                     </div>
 
                     <div className="flex gap-4 mb-6">
@@ -94,10 +92,8 @@ export default function Component({ params }: { params: { slug: string } }) {
                         <div className="col-span-2 space-y-8">
                             <Card className="p-6">
                                 <div className="flex justify-between items-center mb-4">
-                                    <h2 className="text-lg font-semibold">Summary</h2>
-                                    <Button variant="ghost" size="icon" className="text-green-600">
-                                        <Edit2 className="w-4 h-4" />
-                                    </Button>
+                                    <h2 className="text-lg font-semibold">About</h2>
+                                    <EditAboutDialog userDetails={userDetails} userId={params.slug} setUserDetails={setUserDetails} />
                                 </div>
                                 <div className="space-y-4 text-gray-600">
                                     <p>Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.</p>
@@ -209,28 +205,6 @@ export default function Component({ params }: { params: { slug: string } }) {
                         </div>
 
                         <div className="space-y-8">
-                            <Card className="p-6">
-                                <h2 className="text-lg font-semibold mb-4">My Manager</h2>
-                                <div className="space-y-4">
-                                    {[
-                                        { name: "Roy Reznik", title: "Chief Executive Officer" },
-                                        { name: "James Botosh", title: "Chief Operating Officer" },
-                                        { name: "Assaf Rappaport", title: "VP of Customer Operations" },
-                                    ].map((manager) => (
-                                        <div key={manager.name} className="flex items-center gap-3">
-                                            <Avatar>
-                                                <AvatarImage src="/placeholder.svg?height=40&width=40" alt={manager.name} />
-                                                <AvatarFallback>{manager.name[0]}</AvatarFallback>
-                                            </Avatar>
-                                            <div>
-                                                <p className="font-medium">{manager.name}</p>
-                                                <p className="text-sm text-gray-500">{manager.title}</p>
-                                            </div>
-                                        </div>
-                                    ))}
-                                </div>
-                            </Card>
-
                             <Card className="p-6">
                                 <div className="flex justify-between items-center mb-4">
                                     <h2 className="text-lg font-semibold">Additional Details</h2>

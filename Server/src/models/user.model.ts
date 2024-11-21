@@ -9,6 +9,9 @@ interface IUser {
     country: string;
     lastLogin?: Date;
     jobs?: Types.ObjectId[],
+    headline?: string,
+    websiteLink?: string,
+    linkText?: string,
 }
 
 export interface IUserDocument extends IUser, Document {
@@ -48,6 +51,18 @@ const userSchema = new mongoose.Schema<IUserDocument>({
 
         }
     ],
+    headline: {
+        type: String,
+        default: ''
+    },
+    websiteLink: {
+        type: String,
+        default: ''
+    },
+    linkText: {
+        type: String,
+        default: ''
+    }
 }, { timestamps: true });
 
 userSchema.pre('save', function (next) {

@@ -1,7 +1,6 @@
 import type { Metadata } from "next";
 import localFont from "next/font/local";
 import StoreProvider from "./StoreProvider";
-import { Poppins } from "@next/font/google";
 import "./globals.css";
 
 const geistSans = localFont({
@@ -21,11 +20,6 @@ export const metadata: Metadata = {
   description: "Developed by Danish Shah",
 };
 
-const poppins = Poppins({
-  subsets: ["latin"],
-  weight: ["400", "500", "600", "700"],
-});
-
 export default function RootLayout({
   children,
 }: Readonly<{
@@ -35,9 +29,13 @@ export default function RootLayout({
     <html lang="en">
       <head>
         <link rel="icon" type="image/svg+xml" href="/logo.png" />
+        <link
+          href="https://fonts.googleapis.com/css2?family=Poppins:wght@100;200;300;400;500;600;700;800;900&display=swap"
+          rel="stylesheet"
+        />
       </head>
       <body
-        className={`${geistSans.variable} ${geistMono.variable} ${poppins.className} antialiased`}
+        className={`${geistSans.variable} ${geistMono.variable} antialiased`}
       >
         <StoreProvider>
           {children}
