@@ -8,7 +8,8 @@ import toast from "react-hot-toast";
 export interface User {
     _id: string;
     fullname: string;
-    email: string;
+    email: string
+    profilePicture: string;
     city: string;
     country: string;
     lastLogin: Date;
@@ -216,6 +217,23 @@ export async function editAdditionalDetails(data: AdditionalDetailsState): Promi
             headers: {
                 'Content-Type': 'application/json'
             }
+        });
+        if (res.data.success) {
+            toast.success(res.data.message);
+            return res.data;
+        }
+    } catch (error: any) {
+        console.log(error);
+        toast.error(error?.response?.data?.message || 'Something went wrong');
+    }
+}
+
+export async function editProfilePic(data: FormData): Promise<UserResponseData | undefined> {
+    try {
+        const res = await axios.post(`${API_END_POINT}/user/edit-profile-pic`, data, {
+            headers: {
+                'Content-Type': 'multipart/form-data'
+            },
         });
         if (res.data.success) {
             toast.success(res.data.message);

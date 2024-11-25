@@ -19,6 +19,7 @@ interface IUser {
     nickname?: string;
     workHistory?: string[];
     education?: string;
+    profilePicture?: string;
 }
 
 export interface IUserDocument extends IUser, Document {
@@ -38,6 +39,10 @@ const userSchema = new mongoose.Schema<IUserDocument>({
     password: {
         type: String,
         required: true
+    },
+    profilePicture: {
+        type: String,
+        default: ''
     },
     city: {
         type: String,

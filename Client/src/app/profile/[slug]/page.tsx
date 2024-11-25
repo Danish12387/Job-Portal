@@ -154,7 +154,7 @@ export default function Component({ params }: { params: { slug: string } }) {
                             <AvatarImage src={''} />
                             <AvatarFallback><img src="/dummy-person.jpg" alt="Profile" /></AvatarFallback>
                         </Avatar> */}
-                        <EditProfilePicDialog />
+                        <EditProfilePicDialog userDetails={userDetails} setUserDetails={setUserDetails} />
                     </div>
                 </div>
 

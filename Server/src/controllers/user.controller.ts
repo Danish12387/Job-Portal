@@ -1,6 +1,8 @@
 import { Request, Response } from "express";
 import { User } from "../models/user.model";
 import { generateToken } from "../utils/generateToken";
+import getDataUri from "../utils/datauri";
+import cloudinary from "../utils/cloudinary";
 
 export const signup = async (req: Request, res: Response) => {
     try {
@@ -267,6 +269,46 @@ export const editAdditionalDetails = async (req: Request, res: Response) => {
             message: "Profile updated successfully",
             user
         });
+    } catch (error) {
+        console.log(error);
+        return res.status(500).json({ message: "Internal Server Error" });
+    }
+}
+
+export const editProfilePic = async (req: Request, res: Response) => {
+    try {
+        const userId = req.id;
+        const profilePicture = req.file;
+        let cloudResponse;
+
+        if (profilePicture) {
+            const fileUri = getDataUri(profilePicture);
+            if (fileUri) {
+                cloudResponse = await cloudinary.uploader.upload(fileUri);
+            }
+        }
+        const user = await User.findById(userId).select('-password');
+
+        if (!user) {
+            return res.status(404).json({
+                message: 'User not found.',
+                success: false
+            });
+        };
+
+        if (cloudResponse && user) {
+            user.profilePicture = cloudResponse.secure_url;
+        } else {
+            user.profilePicture = '';
+        }
+
+        await user.save();
+        return res.status(200).json({
+            success: true,
+            message: "Profile picture updated successfully",
+            user
+        });
+
     } catch (error) {
         console.log(error);
         return res.status(500).json({ message: "Internal Server Error" });
