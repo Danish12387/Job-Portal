@@ -2,7 +2,7 @@
 
 import Link from "next/link"
 import Image from "next/image"
-import { Edit2, ExternalLink } from "lucide-react"
+import { Edit2, ExternalLink, MoveRight } from "lucide-react"
 import { formatDistanceToNowStrict, format } from 'date-fns';
 import { Button } from "@/components/ui/button"
 import { Card } from "@/components/ui/card"
@@ -17,8 +17,9 @@ import { useAppSelector } from "@/lib/hooks";
 import EditHobbiesDialog from "@/components/EditHobbiesDialog";
 import EditAdditionalDetailsDialog from "@/components/EditAdditionalDetailsDialog";
 import EditProfilePicDialog from "@/components/EditProfilePicDialog";
+import EditProfileBannerDialog from "@/components/EditProfileBannerDialog";
 
-type Section = 'overview' | 'about' | 'hobbies' | 'posts' | 'groups' | 'events';
+type Section = 'overview' | 'about' | 'hobbies' | 'posts' | 'jobs' | 'events';
 
 export default function Component({ params }: { params: { slug: string } }) {
     const { user } = useAppSelector(state => state.user);
@@ -42,17 +43,18 @@ export default function Component({ params }: { params: { slug: string } }) {
                     <>
                         {renderAbout()}
                         {renderHobbies()}
-                        {renderPosts()}
+                        {/* {renderPosts()} */}
+                        {renderJobs()}
                     </>
                 );
             case 'about':
                 return renderAbout();
             case 'hobbies':
                 return renderHobbies();
-            case 'posts':
-                return renderPosts();
-            case 'groups':
-                return <p>Groups content coming soon...</p>;
+            // case 'posts':
+            //     return renderPosts();
+            case 'jobs':
+                return renderJobs();
             case 'events':
                 return <p>Events content coming soon...</p>;
             default:
@@ -96,70 +98,82 @@ export default function Component({ params }: { params: { slug: string } }) {
         </Card>
     );
 
-    const renderPosts = () => (
+    // const renderPosts = () => (
+    //     <div className="space-y-4">
+    //         <div className="flex justify-between items-center">
+    //             <h2 className="text-lg font-semibold">Posts</h2>
+    //             <Button variant="link" className="text-gray-500">
+    //                 View All
+    //             </Button>
+    //         </div>
+    //         {userDetails?.posts && userDetails?.posts.length > 0 ? (
+    //             userDetails?.posts.map((post) => (
+    //                 <Card key={post.title + post.author} className="p-4">
+    //                     <div className="flex justify-between items-start">
+    //                         <div>
+    //                             <h3 className="font-medium">{post.title}</h3>
+    //                             <p className="text-sm text-gray-500">{post.author}</p>
+    //                             <p className="text-sm text-gray-500">{post.date}</p>
+    //                         </div>
+    //                         <Image src={post.image} alt="Post thumbnail" width={80} height={80} className="rounded-lg" />
+    //                     </div>
+    //                 </Card>
+    //             ))
+    //         ) : (
+    //             <p className="text-gray-600">No posts yet.</p>
+    //         )
+    //         }
+    //     </div>
+    // );
+
+    const renderJobs = () => (
         <div className="space-y-4">
             <div className="flex justify-between items-center">
-                <h2 className="text-lg font-semibold">Posts</h2>
+                <h2 className="text-lg font-semibold">Jobs</h2>
                 <Button variant="link" className="text-gray-500">
                     View All
                 </Button>
             </div>
-            {[
-                {
-                    title: "SpotMe $10 Evergreen Referral Incentive is Live!",
-                    author: "Jimmie Harrison",
-                    date: "Joined on February 1, 2021",
-                    image: "/placeholder.svg?height=80&width=80",
-                },
-                {
-                    title: "SpotMe $10 Evergreen Referral Incentive is Live!",
-                    author: "Justin Philips",
-                    date: "Joined on February 1, 2021",
-                    image: "/placeholder.svg?height=80&width=80",
-                },
-                {
-                    title: "SpotMe $10 Evergreen Referral Incentive is Live!",
-                    author: "Abram Calzoni",
-                    date: "Joined on February 1, 2021",
-                    image: "/placeholder.svg?height=80&width=80",
-                },
-            ].map((post) => (
-                <Card key={post.title + post.author} className="p-4">
-                    <div className="flex justify-between items-start">
-                        <div>
-                            <h3 className="font-medium">{post.title}</h3>
-                            <p className="text-sm text-gray-500">{post.author}</p>
-                            <p className="text-sm text-gray-500">{post.date}</p>
+            {userDetails?.jobs && userDetails?.jobs.length > 0 ? (
+                userDetails?.jobs.map((job) => (
+                    <Card key={job.jobTitle + userDetails?.fullname} className="p-4 group">
+                        <div className="flex justify-between items-center">
+                            <div className="max-w-[75%]">
+                                <h3 className="font-medium">{job.jobTitle}</h3>
+                                <p className="text-sm text-gray-900">{userDetails?.fullname}</p>
+                                <p className="text-sm text-gray-500 line-clamp-2">{job?.jobDescription}</p>
+                                <p className="text-sm text-gray-500">
+                                    {job?.createdAt
+                                        ? `${formatDistanceToNowStrict(new Date(job.createdAt), { addSuffix: true })}, on ${format(new Date(job.createdAt), 'MM/dd/yyyy')}`
+                                        : 'N/A'
+                                    }
+                                </p>
+                            </div>
+                            <Link href={`/job-details/${job._id}`}>
+                                <Button variant="ghost" className="relative opacity-0 group-hover:opacity-100 transition duration-300 flex items-center justify-center mr-5 w-[165px] text-primary hover:text-primary">See Details <MoveRight className="group-hover:translate-x-3 absolute right-6 top-[10px] h-5 text-primary transition duration-300" /></Button>
+                            </Link>
                         </div>
-                        <Image src={post.image} alt="Post thumbnail" width={80} height={80} className="rounded-lg" />
-                    </div>
-                </Card>
-            ))}
+                    </Card>
+                ))
+            ) : (
+                <p className="text-gray-600">No posts yet.</p>
+            )
+            }
         </div>
     );
 
     return (
         <MainLayout>
-            <div className="w-full bg-white container mx-auto">
-                <div className="relative h-48 bg-[#e8f5e9]">
-                    <Image
-                        src={'/dummy-banner.jpg'}
-                        alt="Profile background"
-                        width={800}
-                        height={200}
-                        className="w-full h-48 object-cover"
-                    />
-                    <div className="absolute -bottom-16 left-8">
-                        {/* <Avatar className="w-32 h-32 border-4 border-white rounded-full">
-                            <AvatarImage src={''} />
-                            <AvatarFallback><img src="/dummy-person.jpg" alt="Profile" /></AvatarFallback>
-                        </Avatar> */}
+            <div className="w-full bg-white container mx-auto mb-20">
+                <div className="relative h-64 bg-[#e8f5e9]">
+                    <EditProfileBannerDialog userDetails={userDetails} setUserDetails={setUserDetails} />
+                    <div className="absolute -bottom-20 left-8">
                         <EditProfilePicDialog userDetails={userDetails} setUserDetails={setUserDetails} />
                     </div>
                 </div>
 
                 <div className="px-8">
-                    <div className="mt-20 mb-6 flex justify-between items-start">
+                    <div className="mt-24 mb-6 flex justify-between items-start">
                         <div>
                             <h1 className="text-2xl font-semibold">{userDetails?.fullname}</h1>
                             {userDetails?.headline && <p className="">{userDetails?.headline}</p>}
@@ -175,7 +189,7 @@ export default function Component({ params }: { params: { slug: string } }) {
 
                     <div className="border-b mb-8">
                         <nav className="flex gap-8" role="tablist">
-                            {(['overview', 'about', 'hobbies', 'posts', 'groups', 'events'] as Section[]).map((section) => (
+                            {(['overview', 'about', 'hobbies', 'posts', 'jobs', 'events'] as Section[]).map((section) => (
                                 <button
                                     key={section}
                                     onClick={() => setActiveSection(section)}

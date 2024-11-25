@@ -10,6 +10,7 @@ export interface User {
     fullname: string;
     email: string
     profilePicture: string;
+    profileBanner: string;
     city: string;
     country: string;
     lastLogin: Date;
@@ -235,6 +236,73 @@ export async function editProfilePic(data: FormData): Promise<UserResponseData |
                 'Content-Type': 'multipart/form-data'
             },
         });
+        if (res.data.success) {
+            toast.success(res.data.message);
+            return res.data;
+        }
+    } catch (error: any) {
+        console.log(error);
+        toast.error(error?.response?.data?.message || 'Something went wrong');
+    }
+}
+
+export async function deleteProfilePic(url: string): Promise<UserResponseData | undefined> {
+    try {
+        const urlParts = url.split('/');
+        const fileNameWithExtension = urlParts[urlParts.length - 1];
+        const fileName = fileNameWithExtension.split('.')[0];
+        const folder = urlParts.slice(-2, -1);
+
+        const publicId = `${folder}/${fileName}`;
+
+        const res = await axios.post(`${API_END_POINT}/user/delete-profile-pic`, { publicId }, {
+            headers: {
+                'Content-Type': 'application/json'
+            },
+        });
+
+        if (res.data.success) {
+            toast.success(res.data.message);
+            return res.data;
+        }
+    } catch (error: any) {
+        console.log(error);
+        toast.error(error?.response?.data?.message || 'Something went wrong');
+    }
+}
+
+export async function editProfileBanner(data: FormData): Promise<UserResponseData | undefined> {
+    try {
+        const res = await axios.post(`${API_END_POINT}/user/edit-profile-banner`, data, {
+            headers: {
+                'Content-Type': 'multipart/form-data'
+            },
+        });
+        if (res.data.success) {
+            toast.success(res.data.message);
+            return res.data;
+        }
+    } catch (error: any) {
+        console.log(error);
+        toast.error(error?.response?.data?.message || 'Something went wrong');
+    }
+}
+
+export async function deleteProfileBanner(url: string): Promise<UserResponseData | undefined> {
+    try {
+        const urlParts = url.split('/');
+        const fileNameWithExtension = urlParts[urlParts.length - 1];
+        const fileName = fileNameWithExtension.split('.')[0];
+        const folder = urlParts.slice(-2, -1);
+
+        const publicId = `${folder}/${fileName}`;
+
+        const res = await axios.post(`${API_END_POINT}/user/delete-profile-banner`, { publicId }, {
+            headers: {
+                'Content-Type': 'application/json'
+            },
+        });
+
         if (res.data.success) {
             toast.success(res.data.message);
             return res.data;

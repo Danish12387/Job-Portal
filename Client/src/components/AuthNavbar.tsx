@@ -55,8 +55,10 @@ export default function AuthNavbar() {
             <DropdownMenuTrigger asChild>
               <div onClick={() => setOpen(!open)} className={`flex items-center gap-2 cursor-pointer transition-all hover:bg-gray-100 py-1 px-2 rounded focus-visible:ring-transparent border-none`}>
                 <Avatar>
-                  <AvatarImage src="https://github.com/shadcn.png" alt="User avatar" />
-                  <AvatarFallback>CN</AvatarFallback>
+                  <AvatarImage src={user?.profilePicture || '/dummy-person.jpg'} />
+                  <AvatarFallback>
+                    <img src="/dummy-person.jpg" alt="Profile" />
+                  </AvatarFallback>
                 </Avatar>
                 <span className="hidden md:inline max-w-32 truncate">{user?.fullname}</span>
               </div>

@@ -1,5 +1,5 @@
 import express from 'express';
-import { checkAuth, editAdditionalDetails, editHobbies, editProfile, editProfileAbout, editProfilePic, getUserDetails, login, logout, signup } from '../controllers/user.controller';
+import { checkAuth, deleteProfileBanner, deleteProfilePic, editAdditionalDetails, editHobbies, editProfile, editProfileAbout, editProfileBanner, editProfilePic, getUserDetails, login, logout, signup } from '../controllers/user.controller';
 import { isAuthenticated } from '../middlewares/isAuthenticated';
 import upload from "../middlewares/multer.js";
 
@@ -12,6 +12,9 @@ router.route('/edit-profile-about').post(isAuthenticated, editProfileAbout);
 router.route('/edit-hobbies').post(isAuthenticated, editHobbies);
 router.route('/edit-additional-details').post(isAuthenticated, editAdditionalDetails);
 router.route('/edit-profile-pic').post(isAuthenticated, upload.single('profilePicture'), editProfilePic);
+router.route('/edit-profile-banner').post(isAuthenticated, upload.single('profileBanner'), editProfileBanner);
+router.route('/delete-profile-pic').post(isAuthenticated, deleteProfilePic);
+router.route('/delete-profile-banner').post(isAuthenticated, deleteProfileBanner);
 router.route('/signup').post(signup);
 router.route('/login').post(login);
 router.route('/logout').post(logout);

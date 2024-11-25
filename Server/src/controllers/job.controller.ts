@@ -3,7 +3,7 @@ import { Job } from "../models/job.model";
 import mongoose from "mongoose";
 import { User } from "../models/user.model";
 
-export const createJob = async (req: Request, res: Response) => {
+export const createJob = async (req: Request, res: Response): Promise<any> => {
     try {
         const data = req.body;
         const authorId = req.id;
@@ -27,7 +27,7 @@ export const createJob = async (req: Request, res: Response) => {
     }
 }
 
-export const getAllJobs = async (req: Request, res: Response) => {
+export const getAllJobs = async (req: Request, res: Response): Promise<any> => {
     try {
         const page = parseInt(req.query.page as string) || 1;
 
@@ -101,7 +101,7 @@ export const getAllJobs = async (req: Request, res: Response) => {
     }
 };
 
-export const getJobs = async (_: Request, res: Response) => {
+export const getJobs = async (_: Request, res: Response): Promise<any> => {
     try {
         const jobs = await Job.find().sort({ createdAt: -1 }).limit(6);
         return res.status(200).json({
@@ -118,7 +118,7 @@ export const getJobs = async (_: Request, res: Response) => {
     }
 }
 
-export const getSingleJob = async (req: Request, res: Response) => {
+export const getSingleJob = async (req: Request, res: Response): Promise<any> => {
     try {
         const jobId = req.params.id;
         const job = await Job.findById(jobId).populate({ path: 'author', select: '-password' });
@@ -137,7 +137,7 @@ export const getSingleJob = async (req: Request, res: Response) => {
     }
 };
 
-export const getSearchedJobs = async (req: Request, res: Response) => {
+export const getSearchedJobs = async (req: Request, res: Response): Promise<any> => {
     try {
         const query = req.query.q as string;
         const searchFilter = {

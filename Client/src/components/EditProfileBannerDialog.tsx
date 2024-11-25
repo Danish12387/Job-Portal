@@ -1,23 +1,22 @@
 'use client'
 
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
+import React, { useState } from 'react'
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger, DialogFooter } from "@/components/ui/dialog"
 import { Button } from "@/components/ui/button"
-import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog"
+import { Loader2, Trash2, Upload } from 'lucide-react'
+import Cropper from 'react-easy-crop'
+import { getCroppedImg } from '@/utils/getCroppedImage';
+import { deleteProfileBanner, editProfileBanner, User } from '@/utils/apiHandlers';
 import { setUser } from '@/lib/features/user/userSlice'
 import { useAppDispatch } from '@/lib/hooks'
-import { deleteProfilePic, editProfilePic, User } from '@/utils/apiHandlers'
-import { getCroppedImg } from '@/utils/getCroppedImage'
-import { Loader2, Trash2, Upload } from 'lucide-react'
-import React, { useState } from 'react'
-import Cropper from 'react-easy-crop'
-import toast from "react-hot-toast"
+import toast from 'react-hot-toast'
 
 interface EditProfileDialogProps {
     userDetails: User | undefined;
     setUserDetails: React.Dispatch<React.SetStateAction<User | undefined>>;
 }
 
-const EditProfilePicDialog: React.FC<EditProfileDialogProps> = ({ userDetails, setUserDetails }) => {
+const EditProfileBannerDialog: React.FC<EditProfileDialogProps> = ({ userDetails, setUserDetails }) => {
     const dispatch = useAppDispatch();
     const [updateLoading, setUpdateLoading] = useState(false);
     const [deleteLoading, setDeleteLoading] = useState(false);
@@ -57,8 +56,8 @@ const EditProfilePicDialog: React.FC<EditProfileDialogProps> = ({ userDetails, s
             }
             const croppedImageFile = await getCroppedImg(imageSrc, croppedArea, fileName);
             const formData = new FormData();
-            formData.append('profilePicture', croppedImageFile);
-            const res = await editProfilePic(formData);
+            formData.append('profileBanner', croppedImageFile);
+            const res = await editProfileBanner(formData);
             if (res && res.user) {
                 setUserDetails(res.user);
                 dispatch(setUser(res.user));
@@ -68,7 +67,7 @@ const EditProfilePicDialog: React.FC<EditProfileDialogProps> = ({ userDetails, s
                 throw new Error('Failed to update profile');
             }
         } catch (error) {
-            console.error('Error cropping image:', error)
+            console.error('Error updating image:', error);
         } finally {
             setUpdateLoading(false);
         }
@@ -77,8 +76,8 @@ const EditProfilePicDialog: React.FC<EditProfileDialogProps> = ({ userDetails, s
     const handleDeleteImage = async () => {
         try {
             setDeleteLoading(true);
-            if (!userDetails?.profilePicture) return toast.error('No banner to delete');
-            const res = await deleteProfilePic(userDetails?.profilePicture);
+            if (!userDetails?.profileBanner) return toast.error('No banner to delete');
+            const res = await deleteProfileBanner(userDetails?.profileBanner);
             if (res && res.user) {
                 setUserDetails(res.user);
                 dispatch(setUser(res.user));
@@ -97,16 +96,15 @@ const EditProfilePicDialog: React.FC<EditProfileDialogProps> = ({ userDetails, s
     return (
         <Dialog open={isOpen} onOpenChange={setIsOpen}>
             <DialogTrigger asChild>
-                <Avatar className="w-44 h-44 border-4 border-white rounded-full cursor-pointer">
-                    <AvatarImage src={userDetails?.profilePicture || '/dummy-person.jpg'} />
-                    <AvatarFallback>
-                        <img src="/dummy-person.jpg" alt="Profile" />
-                    </AvatarFallback>
-                </Avatar>
+                <img
+                    src={userDetails?.profileBanner || '/dummy-banner.jpg'}
+                    alt="Profile background"
+                    className="w-full h-full object-cover cursor-pointer"
+                />
             </DialogTrigger>
-            <DialogContent className={`max-w-[700px] max-h-[500px] h-[80%] border-none`}>
+            <DialogContent className={`max-w-[1000px] max-h-[500px] h-[70%] border-none`}>
                 <DialogHeader>
-                    <DialogTitle>Edit Profile Photo</DialogTitle>
+                    <DialogTitle>Edit Profile Banner</DialogTitle>
                 </DialogHeader>
                 <div className="flex flex-col items-center gap-4 overflow-y-auto">
                     {imageSrc ? (
@@ -115,17 +113,17 @@ const EditProfilePicDialog: React.FC<EditProfileDialogProps> = ({ userDetails, s
                                 image={imageSrc}
                                 crop={crop}
                                 zoom={zoom}
-                                aspect={1}
+                                aspect={5}
                                 onCropChange={setCrop}
                                 onZoomChange={setZoom}
                                 onCropComplete={handleCropComplete}
-                                cropShape="round"
+                                cropShape="rect"
                                 showGrid={false}
                             />
                         </div>
                     ) : (
-                        <div className="flex flex-col items-center gap-2 h-80">
-                            <img src={userDetails?.profilePicture || '/dummy-person.jpg'} alt="Profile" className="w-full h-full border-4 border-white rounded-lg pointer-events-none" />
+                        <div className="flex flex-col items-center justify-center gap-2 h-80">
+                            <img src={userDetails?.profileBanner || '/dummy-banner.jpg'} alt="Profile" className="w-full h-60 object-cover border-4 border-white rounded-lg pointer-events-none" />
                         </div>
                     )}
                 </div>
@@ -143,7 +141,7 @@ const EditProfilePicDialog: React.FC<EditProfileDialogProps> = ({ userDetails, s
                                     className="hidden"
                                 />
                             </label>
-                            {userDetails?.profilePicture &&
+                            {userDetails?.profileBanner &&
                                 (
                                     deleteLoading ?
                                         <Button disabled variant='ghost'>
@@ -152,7 +150,7 @@ const EditProfilePicDialog: React.FC<EditProfileDialogProps> = ({ userDetails, s
                                         </Button>
                                         :
                                         <Button onClick={handleDeleteImage} variant='ghost' className='text-red-500 hover:text-red-600 focus-visible:ring-transparent outline-none'>
-                                            <Trash2 className='text-red-500 mr-2 h-5' /> Delete Photo
+                                            <Trash2 className='text-red-500 mr-2 h-5' /> Delete Banner
                                         </Button>
                                 )
                             }
@@ -165,14 +163,14 @@ const EditProfilePicDialog: React.FC<EditProfileDialogProps> = ({ userDetails, s
                                 </Button>
                                 :
                                 <Button onClick={handleUpdateImage} disabled={!imageSrc}>
-                                    Update Photo
+                                    Update Banner
                                 </Button>
                         }
                     </div>
                 </DialogFooter>
             </DialogContent>
-        </Dialog>
+        </Dialog >
     )
 }
 
-export default EditProfilePicDialog;
+export default EditProfileBannerDialog;

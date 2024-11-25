@@ -9,7 +9,7 @@ declare global {
     }
 }
 
-export const isAuthenticated = async (req: Request, res: Response, next: NextFunction) => {
+export const isAuthenticated = async (req: Request, res: Response, next: NextFunction): Promise<any> => {
     try {
         const token = req.cookies.token;
 
@@ -20,7 +20,12 @@ export const isAuthenticated = async (req: Request, res: Response, next: NextFun
             })
         }
 
-        const decode = jwt.verify(token, process.env.JWT_SECRET!) as jwt.JwtPayload;
+        const JWT_SECRET = process.env.JWT_SECRET;
+        if (!JWT_SECRET) {
+            throw new Error("JWT_SECRET is not defined in environment variables");
+        }
+
+        const decode = jwt.verify(token, JWT_SECRET) as jwt.JwtPayload;
         if (!decode || !decode.userId) {
             return res.status(401).json({
                 success: false,
@@ -31,8 +36,10 @@ export const isAuthenticated = async (req: Request, res: Response, next: NextFun
         req.id = decode.userId;
         next();
     } catch (error) {
-        return res.status(500).json({
-            message: "Internal Server Error"
-        })
+        console.error("Authentication middleware error:", error);
+        res.status(500).json({
+            success: false,
+            message: "Internal Server Error",
+        });
     }
 };

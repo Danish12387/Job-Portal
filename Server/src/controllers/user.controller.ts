@@ -4,7 +4,7 @@ import { generateToken } from "../utils/generateToken";
 import getDataUri from "../utils/datauri";
 import cloudinary from "../utils/cloudinary";
 
-export const signup = async (req: Request, res: Response) => {
+export const signup = async (req: Request, res: Response): Promise<any> => {
     try {
         const { email } = req.body;
 
@@ -31,7 +31,7 @@ export const signup = async (req: Request, res: Response) => {
     }
 }
 
-export const login = async (req: Request, res: Response) => {
+export const login = async (req: Request, res: Response): Promise<any> => {
     try {
         const { email, password } = req.body;
         const user = await User.findOne({ email });
@@ -66,7 +66,7 @@ export const login = async (req: Request, res: Response) => {
     }
 }
 
-export const logout = (_: Request, res: Response) => {
+export const logout = (_: Request, res: Response): any => {
     try {
         return res.clearCookie("token", { path: '/' }).status(200).json({
             success: true,
@@ -78,7 +78,7 @@ export const logout = (_: Request, res: Response) => {
     }
 }
 
-export const checkAuth = async (req: Request, res: Response) => {
+export const checkAuth = async (req: Request, res: Response): Promise<any> => {
     try {
         const userId = req.id;
         const user = await User.findById(userId).select("-password");
@@ -100,10 +100,11 @@ export const checkAuth = async (req: Request, res: Response) => {
     }
 }
 
-export const getUserDetails = async (req: Request, res: Response) => {
+export const getUserDetails = async (req: Request, res: Response): Promise<any> => {
     try {
         const userId = req.params.id;
-        const user = await User.findById(userId).select("-password").populate({ path: 'jobs' });
+        const user = await User.findById(userId).select("-password").populate({ path: 'jobs', options: { sort: { createdAt: -1 } } });
+
         if (!user) {
             return res.status(404).json({
                 success: false,
@@ -123,7 +124,7 @@ export const getUserDetails = async (req: Request, res: Response) => {
     }
 }
 
-export const editProfile = async (req: Request, res: Response) => {
+export const editProfile = async (req: Request, res: Response): Promise<any> => {
     try {
         const { fullname, headline, country, city, websiteLink, linkText, } = req.body;
         const userId = req.id;
@@ -156,7 +157,7 @@ export const editProfile = async (req: Request, res: Response) => {
     }
 }
 
-export const editProfileAbout = async (req: Request, res: Response) => {
+export const editProfileAbout = async (req: Request, res: Response): Promise<any> => {
     try {
         const { about } = req.body;
         const userId = req.id;
@@ -184,7 +185,7 @@ export const editProfileAbout = async (req: Request, res: Response) => {
     }
 }
 
-export const editHobbies = async (req: Request, res: Response) => {
+export const editHobbies = async (req: Request, res: Response): Promise<any> => {
     try {
         const { hobbies } = req.body;
         console.log(hobbies);
@@ -213,7 +214,7 @@ export const editHobbies = async (req: Request, res: Response) => {
     }
 }
 
-export const editAdditionalDetails = async (req: Request, res: Response) => {
+export const editAdditionalDetails = async (req: Request, res: Response): Promise<any> => {
     try {
         const { languages, pronouns, nickname, workHistory, education } = req.body;
         const userId = req.id;
@@ -275,7 +276,7 @@ export const editAdditionalDetails = async (req: Request, res: Response) => {
     }
 }
 
-export const editProfilePic = async (req: Request, res: Response) => {
+export const editProfilePic = async (req: Request, res: Response): Promise<any> => {
     try {
         const userId = req.id;
         const profilePicture = req.file;
@@ -309,6 +310,120 @@ export const editProfilePic = async (req: Request, res: Response) => {
             user
         });
 
+    } catch (error) {
+        console.log(error);
+        return res.status(500).json({ message: "Internal Server Error" });
+    }
+}
+
+export const deleteProfilePic = async (req: Request, res: Response): Promise<any> => {
+    try {
+        const userId = req.id;
+        const { publicId } = req.body;
+        const user = await User.findById(userId).select('-password');
+
+        if (!user) {
+            return res.status(404).json({
+                message: 'User not found.',
+                success: false
+            });
+        };
+
+        if (!publicId) {
+            return res.status(400).json({ success: false, message: 'Public ID is required' });
+        }
+
+        const cloudResponse = await cloudinary.uploader.destroy(publicId);
+
+        if (cloudResponse && user) {
+            user.profilePicture = '';
+        } else {
+            throw new Error('cloudinary error');
+        }
+
+        await user.save();
+        return res.status(200).json({
+            success: true,
+            message: "Profile picture deleted successfully",
+            user
+        });
+    } catch (error) {
+        console.log(error);
+        return res.status(500).json({ message: "Internal Server Error" });
+    }
+}
+
+export const editProfileBanner = async (req: Request, res: Response): Promise<any> => {
+    try {
+        const userId = req.id;
+        const profileBanner = req.file;
+        let cloudResponse;
+
+        if (profileBanner) {
+            const fileUri = getDataUri(profileBanner);
+            if (fileUri) {
+                cloudResponse = await cloudinary.uploader.upload(fileUri);
+            }
+        }
+        const user = await User.findById(userId).select('-password');
+
+        if (!user) {
+            return res.status(404).json({
+                message: 'User not found.',
+                success: false
+            });
+        };
+
+        if (cloudResponse && user) {
+            user.profileBanner = cloudResponse.secure_url;
+        } else {
+            user.profileBanner = '';
+        }
+
+        await user.save();
+        return res.status(200).json({
+            success: true,
+            message: "Profile banner updated successfully",
+            user
+        });
+
+    } catch (error) {
+        console.log(error);
+        return res.status(500).json({ message: "Internal Server Error" });
+    }
+}
+
+export const deleteProfileBanner = async (req: Request, res: Response): Promise<any> => {
+    try {
+        const userId = req.id;
+        const { publicId } = req.body;
+        const user = await User.findById(userId).select('-password');
+
+        if (!user) {
+            return res.status(404).json({
+                message: 'User not found.',
+                success: false
+            });
+        };
+
+        if (!publicId) {
+            return res.status(400).json({ success: false, message: 'Public ID is required' });
+        }
+
+        const cloudResponse = await cloudinary.uploader.destroy(publicId);
+
+        if (cloudResponse && user) {
+            user.profileBanner = '';
+        } else {
+            throw new Error('cloudinary error');
+        }
+
+        await user.save();
+        return res.status(200).json({
+            success: true,
+            message: "Profile banner deleted successfully",
+            user
+        });
     } catch (error) {
         console.log(error);
         return res.status(500).json({ message: "Internal Server Error" });

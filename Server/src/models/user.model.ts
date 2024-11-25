@@ -20,11 +20,13 @@ interface IUser {
     workHistory?: string[];
     education?: string;
     profilePicture?: string;
+    profileBanner?: string;
 }
 
 export interface IUserDocument extends IUser, Document {
     createdAt: Date;
     updatedAt: Date;
+    comparePassword(password: string): boolean;
 }
 
 const userSchema = new mongoose.Schema<IUserDocument>({
@@ -41,6 +43,10 @@ const userSchema = new mongoose.Schema<IUserDocument>({
         required: true
     },
     profilePicture: {
+        type: String,
+        default: ''
+    },
+    profileBanner: {
         type: String,
         default: ''
     },
