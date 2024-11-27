@@ -13,7 +13,8 @@ import {
     getSortedRowModel,
     useReactTable,
 } from "@tanstack/react-table"
-import { ArrowUpDown, ChevronDown, MoreHorizontal } from "lucide-react"
+import { ArrowUpDown, ChevronDown, MoreHorizontal } from 'lucide-react'
+import { format, formatDistanceToNow } from 'date-fns'
 
 import { Button } from "@/components/ui/button"
 import { Checkbox } from "@/components/ui/checkbox"
@@ -35,68 +36,13 @@ import {
     TableHeader,
     TableRow,
 } from "@/components/ui/table"
-import { Eye, Pencil, Trash2 } from "lucide-react"
+import { Eye, Pencil, Trash2 } from 'lucide-react'
 import MainLayout from "@/components/MainLayout"
-
-const data: Job[] = [
-    {
-        id: "1",
-        title: "Laravel Developer",
-        jobType: "Full Time",
-        postedDate: "05/06/2022",
-        applicationDeadline: "Full Time",
-    },
-    {
-        id: "2",
-        title: "Laravel Developer",
-        jobType: "Full Time",
-        postedDate: "01/06/2022",
-        applicationDeadline: "Full Time",
-    },
-    {
-        id: "3",
-        title: "Laravel Developer",
-        jobType: "Full Time",
-        postedDate: "12/02/2022",
-        applicationDeadline: "Full Time",
-    },
-    {
-        id: "4",
-        title: "Laravel Developer",
-        jobType: "Full Time",
-        postedDate: "12/06/2025",
-        applicationDeadline: "Full Time",
-    },
-    {
-        id: "5",
-        title: "Laravel Developer",
-        jobType: "Full Time",
-        postedDate: "12/06/2021",
-        applicationDeadline: "Full Time",
-    },
-    {
-        id: "6",
-        title: "Laravel Developer",
-        jobType: "Full Time",
-        postedDate: "11/02/2026",
-        applicationDeadline: "Full Time",
-    },
-    {
-        id: "7",
-        title: "Laravel Developer",
-        jobType: "Full Time",
-        postedDate: "12/06/2022",
-        applicationDeadline: "Full Time",
-    },
-]
-
-export type Job = {
-    id: string
-    title: string
-    jobType: string
-    postedDate: string
-    applicationDeadline: string
-}
+import { getUserJobs, Job } from "@/utils/apiHandlers"
+import EditJobDialog from "@/components/EditJobDialog"
+import { Skeleton } from "@/components/ui/skeleton"
+import { setUserJobsState } from "@/lib/features/job/jobSlice"
+import { useAppDispatch, useAppSelector } from "@/lib/hooks"
 
 const columns: ColumnDef<Job>[] = [
     {
@@ -122,9 +68,14 @@ const columns: ColumnDef<Job>[] = [
         enableHiding: false,
     },
     {
-        accessorKey: "title",
+        accessorKey: "jobTitle",
         header: "Title",
-        cell: ({ row }) => <div className="capitalize">{row.getValue("title")}</div>,
+        cell: ({ row }) => <div className="capitalize">{row.getValue("jobTitle")}</div>,
+    },
+    {
+        accessorKey: "companyName",
+        header: "Company",
+        cell: ({ row }) => <div>{row.getValue("companyName")}</div>,
     },
     {
         accessorKey: "jobType",
@@ -132,11 +83,12 @@ const columns: ColumnDef<Job>[] = [
         cell: ({ row }) => <div className="capitalize">{row.getValue("jobType")}</div>,
     },
     {
-        accessorKey: "postedDate",
+        accessorKey: "createdAt",
         header: ({ column }) => {
             return (
                 <Button
                     variant="ghost"
+                    className="p-0"
                     onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
                 >
                     Posted Date
@@ -144,12 +96,18 @@ const columns: ColumnDef<Job>[] = [
                 </Button>
             )
         },
-        cell: ({ row }) => <div>{row.getValue("postedDate")}</div>,
+        cell: ({ row }) => {
+            const date = new Date(row.getValue("createdAt"))
+            return <div title={format(date, 'PPP')}>{formatDistanceToNow(date, { addSuffix: true })}</div>
+        },
     },
     {
         accessorKey: "applicationDeadline",
         header: "Application Deadline",
-        cell: ({ row }) => <div>{row.getValue("applicationDeadline")}</div>,
+        cell: ({ row }) => {
+            const date = new Date(row.getValue("applicationDeadline"))
+            return <div>{format(date, 'PPP')}</div>
+        },
     },
     {
         id: "actions",
@@ -163,9 +121,7 @@ const columns: ColumnDef<Job>[] = [
                     <Button variant="ghost" size="icon">
                         <Eye className="h-4 w-4 text-green-500" />
                     </Button>
-                    <Button variant="ghost" size="icon">
-                        <Pencil className="h-4 w-4 text-blue-500" />
-                    </Button>
+                    <EditJobDialog jobDetails={job} />
                     <Button variant="ghost" size="icon">
                         <Trash2 className="h-4 w-4 text-red-500" />
                     </Button>
@@ -180,9 +136,24 @@ export default function JobListingsDataTable() {
     const [columnFilters, setColumnFilters] = React.useState<ColumnFiltersState>([])
     const [columnVisibility, setColumnVisibility] = React.useState<VisibilityState>({})
     const [rowSelection, setRowSelection] = React.useState({})
+    const [isLoading, setIsLoading] = React.useState(true);
+    const { userJobsState } = useAppSelector(state => state.jobs);
+    const dispatch = useAppDispatch();
+
+    React.useEffect(() => {
+        const fetchUserJobs = async () => {
+            setIsLoading(true)
+            const res = await getUserJobs();
+            if (res) {
+                dispatch(setUserJobsState(res));
+            }
+            setIsLoading(false)
+        }
+        fetchUserJobs()
+    }, [])
 
     const table = useReactTable({
-        data,
+        data: userJobsState,
         columns,
         onSortingChange: setSorting,
         onColumnFiltersChange: setColumnFilters,
@@ -200,19 +171,26 @@ export default function JobListingsDataTable() {
         },
     })
 
+    const selectedJobs = table.getFilteredSelectedRowModel().rows
+
     return (
         <MainLayout>
-            <h1 className='w-ful text-2xl font-semibold text-center bg-gray-100 py-6'>My Jobs list</h1>
+            <h1 className='w-full text-2xl font-semibold text-center bg-gray-100 py-6'>My Jobs List</h1>
             <div className="container my-5 mx-auto">
                 <div className="flex items-center py-4">
                     <Input
-                        placeholder="Filter titles..."
-                        value={(table.getColumn("title")?.getFilterValue() as string) ?? ""}
+                        placeholder="Filter job titles..."
+                        value={(table.getColumn("jobTitle")?.getFilterValue() as string) ?? ""}
                         onChange={(event) =>
-                            table.getColumn("title")?.setFilterValue(event.target.value)
+                            table.getColumn("jobTitle")?.setFilterValue(event.target.value)
                         }
                         className="max-w-sm"
                     />
+                    {selectedJobs.length > 0 && (
+                        <Button variant="destructive" className="ml-2 text-sm px-3">
+                            Delete Selected ({selectedJobs.length})
+                        </Button>
+                    )}
                     <DropdownMenu>
                         <DropdownMenuTrigger asChild>
                             <Button variant="outline" className="ml-auto">
@@ -243,30 +221,37 @@ export default function JobListingsDataTable() {
                         <TableHeader>
                             {table.getHeaderGroups().map((headerGroup) => (
                                 <TableRow key={headerGroup.id}>
-                                    {headerGroup.headers.map((header) => {
-                                        return (
-                                            <TableHead key={header.id}>
-                                                {header.isPlaceholder
-                                                    ? null
-                                                    : flexRender(
-                                                        header.column.columnDef.header,
-                                                        header.getContext()
-                                                    )}
-                                            </TableHead>
-                                        )
-                                    })}
+                                    {headerGroup.headers.map((header) => (
+                                        <TableHead key={header.id}>
+                                            {header.isPlaceholder
+                                                ? null
+                                                : flexRender(
+                                                    header.column.columnDef.header,
+                                                    header.getContext()
+                                                )}
+                                        </TableHead>
+                                    ))}
                                 </TableRow>
                             ))}
                         </TableHeader>
                         <TableBody>
-                            {table.getRowModel().rows?.length ? (
+                            {isLoading ? (
+                                Array.from({ length: 5 }).map((_, index) => (
+                                    <TableRow key={index}>
+                                        {columns.map((column) => (
+                                            <TableCell key={column.id}>
+                                                <Skeleton className="h-6 w-full" />
+                                            </TableCell>
+                                        ))}
+                                    </TableRow>
+                                ))
+                            ) : table.getRowModel().rows?.length ? (
                                 table.getRowModel().rows.map((row) => (
                                     <TableRow
                                         key={row.id}
                                         data-state={row.getIsSelected() && "selected"}
                                     >
                                         {row.getVisibleCells().map((cell) => (
-                                            // className={`${flexRender(cell.column.columnDef.cell, cell.getContext())?.props?.column?.id === 'postedDate' ? "pl-10" : ""}`}
                                             <TableCell key={cell.id}>
                                                 {flexRender(cell.column.columnDef.cell, cell.getContext())}
                                             </TableCell>

@@ -135,6 +135,24 @@ export async function createJob(data: jobPostSchemaType): Promise<JobResponseDat
     }
 }
 
+export async function updateJob(data: jobPostSchemaType, id: string): Promise<JobResponseData | undefined> {
+    try {
+        const res = await axios.post(`${API_END_POINT}/job/update-job/${id}`, data, {
+            headers: {
+                'Content-Type': 'application/json'
+            }
+        });
+
+        if (res.data.success) {
+            toast.success(res.data.message);
+            return res.data;
+        }
+    } catch (error: any) {
+        console.log(error);
+        toast.error(error?.response?.data?.message);
+    }
+}
+
 export async function getSearchedJobs(query: string) {
     try {
         const res = await axios.get(`${API_END_POINT}/job/searchedJobs?q=${query}`);
@@ -310,5 +328,18 @@ export async function deleteProfileBanner(url: string): Promise<UserResponseData
     } catch (error: any) {
         console.log(error);
         toast.error(error?.response?.data?.message || 'Something went wrong');
+    }
+}
+
+export async function getUserJobs(): Promise<Job[] | undefined> {
+    try {
+        const res = await axios.get(`${API_END_POINT}/user/get-user-jobs`);
+
+        if (res.data.success) {
+            return res.data.userJobs.jobs;
+        }
+    } catch (error: any) {
+        console.log(error);
+        toast.error(error?.resonse?.data?.message || "Something went wrong");
     }
 }

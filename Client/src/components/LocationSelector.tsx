@@ -288,7 +288,7 @@ export function LocationSelector({ value, setValue }: LocationSelectorProps): JS
                 </Button>
             </PopoverTrigger>
             <PopoverContent className="w-full p-0">
-                <Command>
+                <Command defaultValue={value}>
                     <CommandInput placeholder="Search Country..." />
                     <CommandList>
                         <CommandEmpty>No Countries found.</CommandEmpty>

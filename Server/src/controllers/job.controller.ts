@@ -27,6 +27,29 @@ export const createJob = async (req: Request, res: Response): Promise<any> => {
     }
 }
 
+export const updateJob = async (req: Request, res: Response): Promise<any> => {
+    try {
+        const data = req.body;
+        const jobId = req.params.id;
+
+        const job = await Job.findByIdAndUpdate(jobId, data, { new: true });
+
+        if (!job) {
+            return res.status(404).json({ success: false, message: "Job not found" });
+        }
+
+        return res.status(200).json({
+            success: true,
+            message: "Job updated successfully",
+            job
+        });
+
+    } catch (error) {
+        console.log(error);
+        return res.status(500).json({ message: "Internal Server Error" });
+    }
+}
+
 export const getAllJobs = async (req: Request, res: Response): Promise<any> => {
     try {
         const page = parseInt(req.query.page as string) || 1;

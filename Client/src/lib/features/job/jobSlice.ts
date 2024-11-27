@@ -16,6 +16,7 @@ export interface JobFilters {
 
 interface JobState {
     jobs: Job[];
+    userJobsState: Job[];
     homeJobs: Job[];
     jobFiltersState: JobFilters | null;
     jobDetails: Job | null;
@@ -27,6 +28,7 @@ interface JobState {
 
 const initialState: JobState = {
     jobs: [],
+    userJobsState: [],
     homeJobs: [],
     jobFiltersState: null,
     jobDetails: null,
@@ -42,6 +44,9 @@ const jobSlice = createSlice({
     reducers: {
         setJobs: (state, action: PayloadAction<Job[]>) => {
             state.jobs = action.payload;
+        },
+        setUserJobsState: (state, action: PayloadAction<Job[]>) => {
+            state.userJobsState = action.payload;
         },
         setHomeJobs: (state, action: PayloadAction<Job[]>) => {
             state.homeJobs = action.payload;
@@ -67,5 +72,5 @@ const jobSlice = createSlice({
     },
 });
 
-export const { setJobs, setHomeJobs, setJobFiltersState, setJobsCount, setJobDetails, incrementPage, setHasMore, setJobLoading } = jobSlice.actions;
+export const { setJobs, setUserJobsState, setHomeJobs, setJobFiltersState, setJobsCount, setJobDetails, incrementPage, setHasMore, setJobLoading } = jobSlice.actions;
 export default jobSlice.reducer;

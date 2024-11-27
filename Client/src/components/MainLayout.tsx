@@ -13,7 +13,7 @@ const MainLayout: React.FC<MainLayoutProps> = ({ children }) => {
         <div className='bg-white'>
             <MainNavbar />
             <AuthCheck>
-                <main className='pt-[75px]'>{children}</main>
+                <main className='pt-[75px] min-h-screen'>{children}</main>
                 <Toaster
                     toastOptions={{
                         duration: 5000,

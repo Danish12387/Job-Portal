@@ -53,14 +53,13 @@ export default function AuthNavbar() {
         <div className="flex items-center gap-4">
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
-              <div onClick={() => setOpen(!open)} className={`flex items-center gap-2 cursor-pointer transition-all hover:bg-gray-100 py-1 px-2 rounded focus-visible:ring-transparent border-none`}>
+              <div onClick={() => setOpen(!open)} className={`flex items-center gap-2 cursor-pointer transition-all hover:bg-gray-100 py-1 px-2 mr-10 rounded focus-visible:ring-transparent border-none`}>
                 <Avatar>
                   <AvatarImage src={user?.profilePicture || '/dummy-person.jpg'} />
                   <AvatarFallback>
                     <img src="/dummy-person.jpg" alt="Profile" />
                   </AvatarFallback>
                 </Avatar>
-                <span className="hidden md:inline max-w-32 truncate">{user?.fullname}</span>
               </div>
             </DropdownMenuTrigger>
             <DropdownMenuContent className='w-48'>

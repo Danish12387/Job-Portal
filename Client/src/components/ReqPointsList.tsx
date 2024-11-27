@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { Plus, X } from 'lucide-react';
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
@@ -13,7 +13,13 @@ type ResPointsListProps = {
 };
 
 const ReqPointsList: React.FC<ResPointsListProps> = ({ input, setInput, errorHandler }) => {
-    const [textareas, setTextareas] = useState([{ id: 1, value: '' }])
+    const [textareas, setTextareas] = useState([{ id: 1, value: '' }]);
+
+    useEffect(() => {
+        if (input.responsibilities.length > 0) {
+            setTextareas(input.responsibilities.map((point, index) => ({ id: index + 1, value: point })));
+        }
+    }, []);
 
     const addTextarea = () => {
         const newId = textareas.length + 1
