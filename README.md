@@ -47,7 +47,7 @@
     </ul>
     <h3>Current and Upcoming Features:</h3>
     <ul>
-        <li><strong>Posts, Comments, and Likes</strong>: We're working on a social-like feature where users can comment on job listings, like them, and post updates to their profiles.</li>
+        <li><strong>Posts, Comments, and Likes</strong>: Currently working on a social-like feature where users can comment on job listings, like them, and post updates to their profiles.</li>
         <li><strong>Bug Fixes</strong>: Ongoing bug fixing and optimizations to improve the overall user experience.</li>
     </ul>
 
@@ -62,7 +62,7 @@
   <h2>Installation & Setup</h2>
     <ol>
         <li>Clone the repository:
-            <pre><code>git clone https://github.com/your-username/job-portal.git</code></pre>
+            <pre><code>https://github.com/Danish12387/Job-Portal</code></pre>
             <pre><code>cd job-portal</code></pre>
         </li>
         <li>Install dependencies:
