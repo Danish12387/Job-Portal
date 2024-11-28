@@ -70,9 +70,12 @@
         </li>
         <li>Set up environment variables in <strong>.env</strong>:
             <ul>
+                <li><strong>PORT</strong> - 8000</li>
                 <li><strong>MONGO_URI</strong> - MongoDB connection string</li>
                 <li><strong>JWT_SECRET</strong> - Secret key for JWT</li>
-                <li>Other configuration variables as required</li>
+                <li><strong>API_KEY</strong> - Cloudinary API Key</li>
+                <li><strong>API_SECRET</strong> - Cloudinary API Secret</li>
+                <li><strong>CLOUD_NAME</strong> - Cloudinary Cloud name</li>
             </ul>
         </li>
         <li>Run the development server:
