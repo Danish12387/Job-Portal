@@ -8,8 +8,8 @@ import {
 } from "@/components/ui/dialog";
 import { useAppDispatch } from '@/lib/hooks';
 import { jobPostSchemaType } from '@/schema/jobSchema';
-import { Job, updateJob } from '@/utils/apiHandlers';
-import { CircleMinus, Edit2, Pencil } from 'lucide-react';
+import { getUserJobs, Job, updateJob } from '@/utils/apiHandlers';
+import { CircleMinus, Edit2, Loader2, Pencil } from 'lucide-react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import React, { ChangeEvent, useEffect, useState } from 'react';
 import toast from 'react-hot-toast';
@@ -25,6 +25,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Textarea } from "@/components/ui/textarea";
 import { jobPostSchema } from "@/schema/jobSchema";
 import { FormEvent } from "react";
+import { setUserJobsState } from "@/lib/features/job/jobSlice";
 
 interface EditProfileDialogProps {
     jobDetails: Job;
@@ -61,7 +62,7 @@ const EditJobDialog: React.FC<EditProfileDialogProps> = ({ jobDetails }) => {
     const [value, setValue] = useState<string>("");
 
     useEffect(() => {
-        const isEditing = searchParams.get('edit') === 'job';
+        const isEditing = searchParams.get('edit') === 'job' && searchParams.get('id') === jobDetails._id;
         setIsOpen(isEditing);
         if (!isEditing && isFormDirty()) {
             setShowWarning(true);
@@ -144,7 +145,7 @@ const EditJobDialog: React.FC<EditProfileDialogProps> = ({ jobDetails }) => {
     };
 
     const openDialog = () => {
-        router.push(`/my-jobs?edit=job`);
+        router.push(`/my-jobs?edit=job&id=${jobDetails._id}`);
     };
 
     const closeDialog = () => {
@@ -235,13 +236,20 @@ const EditJobDialog: React.FC<EditProfileDialogProps> = ({ jobDetails }) => {
         }
         const jobId = jobDetails?._id;
         try {
+            setLoading(true);
             const res = await updateJob(input, jobId);
             if (res?.success) {
+                const response = await getUserJobs();
+                if (response) {
+                    dispatch(setUserJobsState(response));
+                }
                 setIsOpen(false);
             }
 
         } catch (error) {
             console.log(error);
+        } finally {
+            setLoading(false);
         }
     }
 
@@ -442,9 +450,17 @@ const EditJobDialog: React.FC<EditProfileDialogProps> = ({ jobDetails }) => {
                         </div>
 
                         <div className="w-full flex items-center justify-end">
-                            <Button type="submit" className="hover:scale-105 px-10">
-                                Update Job
-                            </Button>
+                            {
+                                loading ?
+                                    <Button disabled>
+                                        <Loader2 className='mr-2 h-4 w-4 animate-spin' />
+                                        Updating...
+                                    </Button>
+                                    :
+                                    <Button type="submit" disabled={!isFormDirty() && true} className="hover:scale-105 px-10">
+                                        Update Job
+                                    </Button>
+                            }
                         </div>
                     </form>
                 </DialogContent>

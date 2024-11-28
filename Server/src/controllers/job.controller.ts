@@ -32,7 +32,7 @@ export const updateJob = async (req: Request, res: Response): Promise<any> => {
         const data = req.body;
         const jobId = req.params.id;
 
-        const job = await Job.findByIdAndUpdate(jobId, data, { new: true });
+        const job = await Job.findByIdAndUpdate(jobId, data);
 
         if (!job) {
             return res.status(404).json({ success: false, message: "Job not found" });
@@ -41,7 +41,6 @@ export const updateJob = async (req: Request, res: Response): Promise<any> => {
         return res.status(200).json({
             success: true,
             message: "Job updated successfully",
-            job
         });
 
     } catch (error) {
@@ -49,6 +48,63 @@ export const updateJob = async (req: Request, res: Response): Promise<any> => {
         return res.status(500).json({ message: "Internal Server Error" });
     }
 }
+
+export const deleteJob = async (req: Request, res: Response): Promise<any> => {
+    try {
+        const jobId = req.params.id;
+
+        const job = await Job.findByIdAndDelete(jobId);
+
+        if (!job) {
+            return res.status(404).json({ success: false, message: "Job not found" });
+        }
+
+        return res.status(200).json({
+            success: true,
+            message: "Job deleted successfully",
+        });
+
+    } catch (error) {
+        console.log(error);
+        return res.status(500).json({ message: "Internal Server Error" });
+    }
+}
+
+export const deleteAllJobs = async (req: Request, res: Response): Promise<any> => {
+    try {
+        const jobIds: string[] = req.body;
+
+        if (!Array.isArray(jobIds) || jobIds.length === 0) {
+            return res.status(400).json({ success: false, message: "Invalid or empty job IDs array" });
+        }
+
+        const results = await Promise.allSettled(
+            jobIds.map((id) =>
+                Job.findByIdAndDelete(id).catch((error) => {
+                    console.error(`Failed to delete job with ID ${id}:`, error);
+                    throw error;
+                })
+            )
+        );
+
+        const failedJobs = results
+            .filter((result) => result.status === "rejected")
+            .map((_, idx) => jobIds[idx]);
+
+        const successCount = results.length - failedJobs.length;
+
+        return res.status(200).json({
+            success: failedJobs.length === 0,
+            message: failedJobs.length === 0
+                ? "All jobs deleted successfully"
+                : `Deleted ${successCount} jobs, but ${failedJobs.length} deletions failed`,
+            failedJobs,
+        });
+    } catch (error) {
+        console.error("Error in deleteAllJobs:", error);
+        return res.status(500).json({ message: "Internal Server Error" });
+    }
+};
 
 export const getAllJobs = async (req: Request, res: Response): Promise<any> => {
     try {

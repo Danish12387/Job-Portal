@@ -25,7 +25,8 @@ export default function AuthNavbar() {
   const router = useRouter()
 
   const logoutHandler = async () => {
-    await logout()
+    await logout();
+    window.location.reload();
     router.push('/login');
   }
 
@@ -53,7 +54,7 @@ export default function AuthNavbar() {
         <div className="flex items-center gap-4">
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
-              <div onClick={() => setOpen(!open)} className={`flex items-center gap-2 cursor-pointer transition-all hover:bg-gray-100 py-1 px-2 mr-10 rounded focus-visible:ring-transparent border-none`}>
+              <div onClick={() => setOpen(!open)} className={`flex items-center gap-2 cursor-pointer transition-all py-1 px-2 mr-10 rounded focus-visible:ring-transparent border-none`}>
                 <Avatar>
                   <AvatarImage src={user?.profilePicture || '/dummy-person.jpg'} />
                   <AvatarFallback>
@@ -66,9 +67,7 @@ export default function AuthNavbar() {
               <DropdownMenuLabel className='truncate'>{user?.email}</DropdownMenuLabel>
               <DropdownMenuSeparator />
               <Link href={`/profile/${user?._id}`}><DropdownMenuItem>Profile</DropdownMenuItem></Link>
-              <DropdownMenuItem>Billing</DropdownMenuItem>
-              <DropdownMenuItem>Team</DropdownMenuItem>
-              <DropdownMenuItem>Subscription</DropdownMenuItem>
+              <Link href={`/my-jobs`}><DropdownMenuItem>Manage Jobs</DropdownMenuItem></Link>
               <DropdownMenuSeparator />
               <DropdownMenuItem onClick={logoutHandler}>
                 Log out

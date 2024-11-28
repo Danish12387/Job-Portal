@@ -156,7 +156,7 @@ export default function Component({ params }: { params: { slug: string } }) {
                     </Card>
                 ))
             ) : (
-                <p className="text-gray-600">No posts yet.</p>
+                <p className="text-gray-600">No jobs posted.</p>
             )
             }
         </div>

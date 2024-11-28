@@ -13,7 +13,7 @@ import {
     getSortedRowModel,
     useReactTable,
 } from "@tanstack/react-table"
-import { ArrowUpDown, ChevronDown, MoreHorizontal } from 'lucide-react'
+import { ArrowUpDown, ChevronDown, Loader2, MoreHorizontal } from 'lucide-react'
 import { format, formatDistanceToNow } from 'date-fns'
 
 import { Button } from "@/components/ui/button"
@@ -35,10 +35,11 @@ import {
     TableHead,
     TableHeader,
     TableRow,
-} from "@/components/ui/table"
+} from "@/components/ui/table";
+import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from "@/components/ui/alert-dialog";
 import { Eye, Pencil, Trash2 } from 'lucide-react'
 import MainLayout from "@/components/MainLayout"
-import { getUserJobs, Job } from "@/utils/apiHandlers"
+import { deleteAllJobs, deleteJob, getUserJobs, Job } from "@/utils/apiHandlers"
 import EditJobDialog from "@/components/EditJobDialog"
 import { Skeleton } from "@/components/ui/skeleton"
 import { setUserJobsState } from "@/lib/features/job/jobSlice"
@@ -115,6 +116,28 @@ const columns: ColumnDef<Job>[] = [
         header: "Actions",
         cell: ({ row }) => {
             const job = row.original;
+            const [deleteLoading, setDeleteLoading] = React.useState<boolean>(false);
+            const [showWarning, setShowWarning] = React.useState<boolean>(false);
+            const dispatch = useAppDispatch();
+
+            const deleteJobFn = async () => {
+                setShowWarning(true);
+            }
+
+            const cancelDelete = () => {
+                setShowWarning(false);
+            }
+
+            const confirmDelete = async () => {
+                setDeleteLoading(true);
+                await deleteJob(job._id);
+
+                const response = await getUserJobs();
+                if (response) {
+                    dispatch(setUserJobsState(response));
+                }
+                setDeleteLoading(false);
+            }
 
             return (
                 <div className="flex items-center justify-start space-x-2 w-fit">
@@ -122,9 +145,31 @@ const columns: ColumnDef<Job>[] = [
                         <Eye className="h-4 w-4 text-green-500" />
                     </Button>
                     <EditJobDialog jobDetails={job} />
-                    <Button variant="ghost" size="icon">
+                    <Button variant="ghost" size="icon" onClick={deleteJobFn}>
                         <Trash2 className="h-4 w-4 text-red-500" />
                     </Button>
+                    <AlertDialog open={showWarning} onOpenChange={setShowWarning}>
+                        <AlertDialogContent>
+                            <AlertDialogHeader>
+                                <AlertDialogTitle>{job?.jobTitle}</AlertDialogTitle>
+                                <AlertDialogDescription>
+                                    Are you sure. You want to delete this job?
+                                </AlertDialogDescription>
+                            </AlertDialogHeader>
+                            <AlertDialogFooter>
+                                <AlertDialogCancel onClick={cancelDelete}>Cancel</AlertDialogCancel>
+                                {
+                                    deleteLoading ?
+                                        <AlertDialogAction disabled>
+                                            <Loader2 className='mr-2 h-4 w-4 animate-spin' />
+                                            Deleting...
+                                        </AlertDialogAction>
+                                        :
+                                        <AlertDialogAction onClick={confirmDelete}>Confirm delete</AlertDialogAction>
+                                }
+                            </AlertDialogFooter>
+                        </AlertDialogContent>
+                    </AlertDialog>
                 </div>
             )
         },
@@ -137,6 +182,8 @@ export default function JobListingsDataTable() {
     const [columnVisibility, setColumnVisibility] = React.useState<VisibilityState>({})
     const [rowSelection, setRowSelection] = React.useState({})
     const [isLoading, setIsLoading] = React.useState(true);
+    const [deleteAllJobsLoading, setDeleteAllJobsLoading] = React.useState(false);
+    const [showWarning, setShowWarning] = React.useState(false);
     const { userJobsState } = useAppSelector(state => state.jobs);
     const dispatch = useAppDispatch();
 
@@ -150,7 +197,30 @@ export default function JobListingsDataTable() {
             setIsLoading(false)
         }
         fetchUserJobs()
-    }, [])
+    }, []);
+
+    const deleteAllSelectedJobs = async () => {
+        setShowWarning(true);
+    }
+
+    const cancelDelete = () => {
+        setShowWarning(false);
+    }
+
+    const confirmDelete = async () => {
+        setDeleteAllJobsLoading(true);
+        const jobIds = userJobsState.map(job => job._id);
+
+        const res = await deleteAllJobs(jobIds);
+        if (res) {
+            const response = await getUserJobs();
+            if (response) {
+                dispatch(setUserJobsState(response));
+            }
+        }
+
+        setDeleteAllJobsLoading(false);
+    }
 
     const table = useReactTable({
         data: userJobsState,
@@ -171,7 +241,7 @@ export default function JobListingsDataTable() {
         },
     })
 
-    const selectedJobs = table.getFilteredSelectedRowModel().rows
+    const selectedJobs = table.getFilteredSelectedRowModel().rows;
 
     return (
         <MainLayout>
@@ -187,10 +257,32 @@ export default function JobListingsDataTable() {
                         className="max-w-sm"
                     />
                     {selectedJobs.length > 0 && (
-                        <Button variant="destructive" className="ml-2 text-sm px-3">
+                        <Button variant="destructive" className="ml-2 text-sm px-3" onClick={deleteAllSelectedJobs}>
                             Delete Selected ({selectedJobs.length})
                         </Button>
                     )}
+                    <AlertDialog open={showWarning} onOpenChange={setShowWarning}>
+                        <AlertDialogContent>
+                            <AlertDialogHeader>
+                                <AlertDialogTitle>Delete All Jobs</AlertDialogTitle>
+                                <AlertDialogDescription>
+                                    Are you sure. You want to delete all selected job?
+                                </AlertDialogDescription>
+                            </AlertDialogHeader>
+                            <AlertDialogFooter>
+                                <AlertDialogCancel onClick={cancelDelete}>Cancel</AlertDialogCancel>
+                                {
+                                    deleteAllJobsLoading ?
+                                        <AlertDialogAction disabled>
+                                            <Loader2 className='mr-2 h-4 w-4 animate-spin' />
+                                            Deleting...
+                                        </AlertDialogAction>
+                                        :
+                                        <AlertDialogAction onClick={confirmDelete}>Confirm delete</AlertDialogAction>
+                                }
+                            </AlertDialogFooter>
+                        </AlertDialogContent>
+                    </AlertDialog>
                     <DropdownMenu>
                         <DropdownMenuTrigger asChild>
                             <Button variant="outline" className="ml-auto">

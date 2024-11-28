@@ -153,6 +153,39 @@ export async function updateJob(data: jobPostSchemaType, id: string): Promise<Jo
     }
 }
 
+export async function deleteJob(id: string): Promise<void> {
+    try {
+        const res = await axios.delete(`${API_END_POINT}/job/delete-job/${id}`);
+
+        if (res.data.success) {
+            toast.success(res.data.message);
+        }
+
+    } catch (error: any) {
+        console.log(error);
+        toast.error(error?.response?.data?.message || "Something went wrong");
+    }
+}
+
+export async function deleteAllJobs(data: string[]): Promise<any> {
+    try {
+        const res = await axios.post(`${API_END_POINT}/job/delete-all-jobs`, data, {
+            headers: {
+                'Content-Type': 'application/json'
+            }
+        });
+
+        if (res.data.success) {
+            toast.success(res.data.message);
+            return res.data;
+        }
+
+    } catch (error: any) {
+        console.log(error);
+        toast.error(error?.response?.data?.message || 'Something went wrong');
+    }
+}
+
 export async function getSearchedJobs(query: string) {
     try {
         const res = await axios.get(`${API_END_POINT}/job/searchedJobs?q=${query}`);
