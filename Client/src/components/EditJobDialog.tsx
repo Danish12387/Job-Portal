@@ -145,21 +145,21 @@ const EditJobDialog: React.FC<EditProfileDialogProps> = ({ jobDetails }) => {
     };
 
     const openDialog = () => {
-        router.push(`/my-jobs?edit=job&id=${jobDetails._id}`);
+        router.push(`/manage-jobs?edit=job&id=${jobDetails._id}`);
     };
 
     const closeDialog = () => {
         if (isFormDirty()) {
             setShowWarning(true);
         } else {
-            router.push(`/my-jobs`);
+            router.push(`/manage-jobs`);
         }
     };
 
     const handleDiscard = () => {
         setInput(initialForm);
         setShowWarning(false);
-        router.push(`/my-jobs`);
+        router.push(`/manage-jobs`);
     };
 
     const handleKeepEditing = () => {

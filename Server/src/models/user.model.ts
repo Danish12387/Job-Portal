@@ -7,6 +7,7 @@ interface IUser {
     password: string;
     city: string;
     country: string;
+    userRole: string;
     lastLogin?: Date;
     jobs?: Types.ObjectId[],
     headline?: string,
@@ -55,6 +56,10 @@ const userSchema = new mongoose.Schema<IUserDocument>({
         required: true
     },
     country: {
+        type: String,
+        required: true
+    },
+    userRole: {
         type: String,
         required: true
     },

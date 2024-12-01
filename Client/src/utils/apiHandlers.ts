@@ -13,6 +13,7 @@ export interface User {
     profileBanner: string;
     city: string;
     country: string;
+    userRole: string;
     lastLogin: Date;
     jobs?: Job[];
     headline?: string;
@@ -108,12 +109,9 @@ export async function logout() {
     try {
         const res = await axios.post(`${API_END_POINT}/user/logout`);
 
-        if (res.data.success) {
-            toast.success(res.data.message);
-        }
     } catch (error: any) {
         console.log(error);
-        toast.error(error?.response?.data?.message);
+        toast.error(error?.response?.data?.message || "Something went wrong");
     }
 }
 

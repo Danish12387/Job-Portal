@@ -1,8 +1,7 @@
 'use client'
 
-import Link from 'next/link'
-import React, { useState } from 'react'
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
+import { Button } from "@/components/ui/button"
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -12,12 +11,13 @@ import {
   DropdownMenuShortcut,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
-import { logout } from '@/utils/apiHandlers'
-import { useRouter } from 'next/navigation'
-import { Button } from "@/components/ui/button"
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet"
-import { Menu } from "lucide-react"
 import { useAppSelector } from '@/lib/hooks'
+import { logout } from '@/utils/apiHandlers'
+import { Menu } from "lucide-react"
+import Link from 'next/link'
+import { useRouter } from 'next/navigation'
+import { useState } from 'react'
 
 export default function AuthNavbar() {
   const { user } = useAppSelector(state => state.user);
@@ -32,7 +32,7 @@ export default function AuthNavbar() {
 
   const navItems = [
     { title: "Start a Search", href: "/job-search" },
-    { title: "Job list", href: "#" },
+    { title: "Posts", href: "/posts" },
     { title: "Create Job", href: "/create-job" },
     { title: "Salary estimate", href: "#" },
   ]
@@ -46,9 +46,15 @@ export default function AuthNavbar() {
         </Link>
         <div className='hidden md:flex items-center gap-10 text-[15px]'>
           {navItems.map((item, index) => (
-            <Link key={index} href={item.href} className='hover:text-primary transition-all cursor-pointer'>
-              {item.title}
-            </Link>
+            item.title === 'Create Job' && user?.userRole !== 'Recruiter' ? null : (
+              <Link
+                key={index}
+                href={item.href}
+                className='hover:text-primary transition-all cursor-pointer'
+              >
+                {item.title}
+              </Link>
+            )
           ))}
         </div>
         <div className="flex items-center gap-4">
@@ -67,7 +73,10 @@ export default function AuthNavbar() {
               <DropdownMenuLabel className='truncate'>{user?.email}</DropdownMenuLabel>
               <DropdownMenuSeparator />
               <Link href={`/profile/${user?._id}`}><DropdownMenuItem>Profile</DropdownMenuItem></Link>
-              <Link href={`/my-jobs`}><DropdownMenuItem>Manage Jobs</DropdownMenuItem></Link>
+              {
+                user?.userRole === "Recruiter" && (
+                  <Link href={`/manage-jobs`}><DropdownMenuItem>Manage Jobs</DropdownMenuItem></Link>
+                )}
               <DropdownMenuSeparator />
               <DropdownMenuItem onClick={logoutHandler}>
                 Log out

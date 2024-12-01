@@ -20,6 +20,7 @@ const Login: NextPage = () => {
     })
     const [errors, setErrors] = useState<Partial<LoginInputState>>({});
     const [hide, setHide] = useState(false);
+    const [loading, setLoading] = useState<boolean>(false);
     const router = useRouter();
     const dispatch = useAppDispatch();
 
@@ -39,8 +40,7 @@ const Login: NextPage = () => {
         });
     }
 
-    const loginSubmitHandler = async (e: FormEvent) => {
-        e.preventDefault();
+    const loginSubmitHandler = async () => {
         const result = userLoginSchema.safeParse(input);
         if (!result.success) {
             const fieldErrors = result.error.formErrors.fieldErrors;
@@ -48,6 +48,7 @@ const Login: NextPage = () => {
             return;
         }
         try {
+            setLoading(true);
             const res = await userLogin(input);
             if (res) {
                 dispatch(setUser(res.user));
@@ -55,6 +56,8 @@ const Login: NextPage = () => {
             }
         } catch (error) {
             console.log(error);
+        } finally {
+            setLoading(false);
         }
     }
 
@@ -63,8 +66,7 @@ const Login: NextPage = () => {
             <div className='flex flex-col justify-between min-h-screen'>
                 <h1 className='text-3xl w-ful font-semibold text-center bg-gray-100 py-6'>Login</h1>
                 <div className='flex-1 flex items-center justify-center'>
-                    <form
-                        onSubmit={loginSubmitHandler}
+                    <div
                         className="sm:p-8 p-3 w-full max-w-md rounded-lg m-auto my-5" >
                         <div className="mb-4">
                             <h1 className='text-[16px] font-semibold my-2'>Email</h1>
@@ -107,18 +109,18 @@ const Login: NextPage = () => {
                             </div>
                         </div>
                         <div>
-                            {/* {loading ? (
-                            <Button disabled className="w-full bg-orange hover:bg-hoverOrange">
-                                <Loader2 className="mr-2 h-4 w-4 animate-spin" /> Please wait
-                            </Button>
-                        ) : ( */}
-                            <Button
-                                type="submit"
-                                className="w-full"
-                            >
-                                Login
-                            </Button>
-                            {/* )} */}
+                            {loading ? (
+                                <Button disabled className="w-full bg-primary">
+                                    <Loader2 className="mr-2 h-4 w-4 animate-spin" /> Please wait
+                                </Button>
+                            ) : (
+                                <Button
+                                    onClick={loginSubmitHandler}
+                                    className="w-full"
+                                >
+                                    Login
+                                </Button>
+                            )}
                         </div>
                         <Separator />
                         <p className="mt-6 text-center font-semibold text-sm sm:text-[16px]">
@@ -127,7 +129,7 @@ const Login: NextPage = () => {
                                 Create Account
                             </Link>
                         </p>
-                    </form>
+                    </div>
                 </div>
             </div>
         </MainLayout>

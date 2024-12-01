@@ -1,33 +1,35 @@
 "use client"
 
-import * as React from "react"
 import {
     ColumnDef,
     ColumnFiltersState,
-    SortingState,
-    VisibilityState,
     flexRender,
     getCoreRowModel,
     getFilteredRowModel,
     getPaginationRowModel,
     getSortedRowModel,
+    SortingState,
     useReactTable,
+    VisibilityState,
 } from "@tanstack/react-table"
-import { ArrowUpDown, ChevronDown, Loader2, MoreHorizontal } from 'lucide-react'
 import { format, formatDistanceToNow } from 'date-fns'
+import { ArrowUpDown, ChevronDown, Loader2 } from 'lucide-react'
+import * as React from "react"
 
+import EditJobDialog from "@/components/EditJobDialog"
+import Loader from "@/components/Loader/Loader"
+import MainLayout from "@/components/MainLayout"
+import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from "@/components/ui/alert-dialog"
 import { Button } from "@/components/ui/button"
 import { Checkbox } from "@/components/ui/checkbox"
 import {
     DropdownMenu,
     DropdownMenuCheckboxItem,
     DropdownMenuContent,
-    DropdownMenuItem,
-    DropdownMenuLabel,
-    DropdownMenuSeparator,
-    DropdownMenuTrigger,
+    DropdownMenuTrigger
 } from "@/components/ui/dropdown-menu"
 import { Input } from "@/components/ui/input"
+import { Skeleton } from "@/components/ui/skeleton"
 import {
     Table,
     TableBody,
@@ -35,15 +37,13 @@ import {
     TableHead,
     TableHeader,
     TableRow,
-} from "@/components/ui/table";
-import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from "@/components/ui/alert-dialog";
-import { Eye, Pencil, Trash2 } from 'lucide-react'
-import MainLayout from "@/components/MainLayout"
-import { deleteAllJobs, deleteJob, getUserJobs, Job } from "@/utils/apiHandlers"
-import EditJobDialog from "@/components/EditJobDialog"
-import { Skeleton } from "@/components/ui/skeleton"
+} from "@/components/ui/table"
+import useCheckAuth from "@/hooks/useCheckAuth"
 import { setUserJobsState } from "@/lib/features/job/jobSlice"
 import { useAppDispatch, useAppSelector } from "@/lib/hooks"
+import { deleteAllJobs, deleteJob, getUserJobs, Job } from "@/utils/apiHandlers"
+import { Trash2 } from 'lucide-react'
+import { useRouter } from "next/navigation"
 
 const columns: ColumnDef<Job>[] = [
     {
@@ -141,9 +141,9 @@ const columns: ColumnDef<Job>[] = [
 
             return (
                 <div className="flex items-center justify-start space-x-2 w-fit">
-                    <Button variant="ghost" size="icon">
+                    {/* <Button variant="ghost" size="icon">
                         <Eye className="h-4 w-4 text-green-500" />
-                    </Button>
+                    </Button> */}
                     <EditJobDialog jobDetails={job} />
                     <Button variant="ghost" size="icon" onClick={deleteJobFn}>
                         <Trash2 className="h-4 w-4 text-red-500" />
@@ -185,7 +185,17 @@ export default function JobListingsDataTable() {
     const [deleteAllJobsLoading, setDeleteAllJobsLoading] = React.useState(false);
     const [showWarning, setShowWarning] = React.useState(false);
     const { userJobsState } = useAppSelector(state => state.jobs);
+    const { user } = useAppSelector(state => state.user);
+    const router = useRouter();
     const dispatch = useAppDispatch();
+
+    React.useEffect(() => {
+        if (user && user?.userRole !== 'Recruiter') {
+            router.replace('/not-found');
+        }
+    }, [user]);
+
+    useCheckAuth();
 
     React.useEffect(() => {
         const fetchUserJobs = async () => {
@@ -242,6 +252,8 @@ export default function JobListingsDataTable() {
     })
 
     const selectedJobs = table.getFilteredSelectedRowModel().rows;
+
+    if (!user) return <Loader />;
 
     return (
         <MainLayout>

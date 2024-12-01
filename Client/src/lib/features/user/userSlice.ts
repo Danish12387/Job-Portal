@@ -3,16 +3,20 @@ import { User } from '@/utils/apiHandlers';
 
 interface UserState {
     API_END_POINT1: string;
-    isAuthenticated: boolean
-    loading: boolean
+    isAuthenticated: boolean;
+    loading: boolean;
+    progress: number;
     user: User | null;
+    suggestedUsers: User[];
 }
 
 const initialState: UserState = {
     API_END_POINT1: "http://localhost:8000/api/v1",
     isAuthenticated: false,
     loading: true,
-    user: null
+    progress: 0,
+    user: null,
+    suggestedUsers: []
 };
 
 const userSlice = createSlice({
@@ -28,8 +32,14 @@ const userSlice = createSlice({
         setLoading: (state, action: PayloadAction<boolean>) => {
             state.loading = action.payload;
         },
+        setProgress: (state, action: PayloadAction<number>) => {
+            state.progress = action.payload;
+        },
+        setSuggestedUsers: (state, action: PayloadAction<User[]>) => {
+            state.suggestedUsers = action.payload;
+        },
     },
 });
 
-export const { setUser, setIsAuthenticated, setLoading } = userSlice.actions;
+export const { setUser, setIsAuthenticated, setLoading, setProgress, setSuggestedUsers } = userSlice.actions;
 export default userSlice.reducer;

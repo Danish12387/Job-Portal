@@ -12,11 +12,12 @@ import { useAppDispatch } from '@/lib/hooks'
 import toast from 'react-hot-toast'
 
 interface EditProfileDialogProps {
+    isOwnProfile: boolean;
     userDetails: User | undefined;
     setUserDetails: React.Dispatch<React.SetStateAction<User | undefined>>;
 }
 
-const EditProfileBannerDialog: React.FC<EditProfileDialogProps> = ({ userDetails, setUserDetails }) => {
+const EditProfileBannerDialog: React.FC<EditProfileDialogProps> = ({ isOwnProfile, userDetails, setUserDetails }) => {
     const dispatch = useAppDispatch();
     const [updateLoading, setUpdateLoading] = useState(false);
     const [deleteLoading, setDeleteLoading] = useState(false);
@@ -104,7 +105,13 @@ const EditProfileBannerDialog: React.FC<EditProfileDialogProps> = ({ userDetails
             </DialogTrigger>
             <DialogContent className={`max-w-[1000px] max-h-[500px] h-[70%] border-none`}>
                 <DialogHeader>
-                    <DialogTitle>Edit Profile Banner</DialogTitle>
+                    {isOwnProfile
+                        ? (
+                            <DialogTitle>Edit Profile Banner</DialogTitle>
+                        )
+                        :
+                        <DialogTitle>{userDetails?.fullname}&apos;s Profile Banner</DialogTitle>
+                    }
                 </DialogHeader>
                 <div className="flex flex-col items-center gap-4 overflow-y-auto">
                     {imageSrc ? (
@@ -127,47 +134,51 @@ const EditProfileBannerDialog: React.FC<EditProfileDialogProps> = ({ userDetails
                         </div>
                     )}
                 </div>
-                <DialogFooter>
-                    <div className='flex justify-between items-center w-full'>
-                        <div className='flex justify-between items-center gap-5'>
-                            <label htmlFor="upload-photo" className="flex items-center gap-2 cursor-pointer">
-                                <Upload className="w-5 h-5" />
-                                <span>Upload Photo</span>
-                                <input
-                                    type="file"
-                                    id="upload-photo"
-                                    accept="image/*"
-                                    onChange={handleFileChange}
-                                    className="hidden"
-                                />
-                            </label>
-                            {userDetails?.profileBanner &&
-                                (
-                                    deleteLoading ?
-                                        <Button disabled variant='ghost'>
+                {
+                    isOwnProfile &&
+                    (
+                        <DialogFooter>
+                            <div className='flex justify-between items-center w-full'>
+                                <div className='flex justify-between items-center gap-5'>
+                                    <label htmlFor="upload-photo" className="flex items-center gap-2 cursor-pointer">
+                                        <Upload className="w-5 h-5" />
+                                        <span>Upload Photo</span>
+                                        <input
+                                            type="file"
+                                            id="upload-photo"
+                                            accept="image/*"
+                                            onChange={handleFileChange}
+                                            className="hidden"
+                                        />
+                                    </label>
+                                    {userDetails?.profileBanner &&
+                                        (
+                                            deleteLoading ?
+                                                <Button disabled variant='ghost'>
+                                                    <Loader2 className='mr-2 h-4 w-4 animate-spin' />
+                                                    Deleting...
+                                                </Button>
+                                                :
+                                                <Button onClick={handleDeleteImage} variant='ghost' className='text-red-500 hover:text-red-600 focus-visible:ring-transparent outline-none'>
+                                                    <Trash2 className='text-red-500 mr-2 h-5' /> Delete Banner
+                                                </Button>
+                                        )
+                                    }
+                                </div>
+                                {
+                                    updateLoading ?
+                                        <Button disabled>
                                             <Loader2 className='mr-2 h-4 w-4 animate-spin' />
-                                            Deleting...
+                                            Updating...
                                         </Button>
                                         :
-                                        <Button onClick={handleDeleteImage} variant='ghost' className='text-red-500 hover:text-red-600 focus-visible:ring-transparent outline-none'>
-                                            <Trash2 className='text-red-500 mr-2 h-5' /> Delete Banner
+                                        <Button onClick={handleUpdateImage} disabled={!imageSrc}>
+                                            Update Banner
                                         </Button>
-                                )
-                            }
-                        </div>
-                        {
-                            updateLoading ?
-                                <Button disabled>
-                                    <Loader2 className='mr-2 h-4 w-4 animate-spin' />
-                                    Updating...
-                                </Button>
-                                :
-                                <Button onClick={handleUpdateImage} disabled={!imageSrc}>
-                                    Update Banner
-                                </Button>
-                        }
-                    </div>
-                </DialogFooter>
+                                }
+                            </div>
+                        </DialogFooter>
+                    )}
             </DialogContent>
         </Dialog >
     )

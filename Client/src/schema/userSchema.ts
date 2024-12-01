@@ -6,6 +6,7 @@ export const userSignupSchema = z.object({
     password: z.string().min(6, "Password must be atleast 6 characters long"),
     city: z.string().min(1, "City is required"),
     country: z.string().min(1, "Country is required"),
+    userRole: z.string().min(1, "User role is required"),
 })
 
 export type SignupInputState = z.infer<typeof userSignupSchema>

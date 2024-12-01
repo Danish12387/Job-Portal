@@ -14,7 +14,10 @@ import { useRouter } from 'next/navigation';
 import ResPointsList from "@/components/ResPointsList"
 import ReqPointsList from "@/components/ReqPointsList"
 import toast from "react-hot-toast";
-import { CircleMinus } from "lucide-react"
+import { CircleMinus, Loader2 } from "lucide-react"
+import { useAppDispatch, useAppSelector } from "@/lib/hooks"
+import Loader from "@/components/Loader/Loader"
+import useCheckAuth from "@/hooks/useCheckAuth"
 
 export default function JobPostingForm() {
     const [input, setInput] = useState<jobPostSchemaType>({
@@ -38,7 +41,17 @@ export default function JobPostingForm() {
     const [errors, setErrors] = useState<Partial<jobPostSchemaType>>({});
     const [date, setDate] = useState<Date>();
     const [value, setValue] = useState<string>("");
+    const { user } = useAppSelector(state => state.user);
+    const [loading, setLoading] = useState<boolean>(false);
     const router = useRouter();
+
+    useEffect(() => {
+        if (user && user?.userRole !== 'Recruiter') {
+            router.replace('/not-found');
+        }
+    }, [user]);
+
+    useCheckAuth();
 
     useEffect(() => {
         if (value) {
@@ -154,12 +167,17 @@ export default function JobPostingForm() {
         }
 
         try {
+            setLoading(true);
             await createJob(input);
             router.push('/');
         } catch (error) {
             console.log(error);
+        } finally {
+            setLoading(false);
         }
     }
+
+    if (!user) return <Loader />
 
     return (
         <MainLayout>
@@ -336,9 +354,15 @@ export default function JobPostingForm() {
                     </div>
 
                     <div className="w-full flex items-center justify-end">
-                        <Button type="submit" className="hover:scale-105 px-10">
-                            Post Job
-                        </Button>
+                        {loading ? (
+                            <Button disabled className="bg-primary">
+                                <Loader2 className="mr-2 h-4 w-4 animate-spin" /> Please wait
+                            </Button>
+                        ) : (
+                            <Button type="submit" className="hover:scale-105 px-10">
+                                Post Job
+                            </Button>
+                        )}
                     </div>
                 </form>
             </div>

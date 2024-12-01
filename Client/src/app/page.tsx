@@ -19,15 +19,7 @@ const Home: NextPage = () => {
   const [searchJobs, setSearchJobs] = useState([]);
   const router = useRouter();
   const categories = Array(10).fill('Technology');
-
-  const jobs = Array(5).fill({
-    title: 'Fresher UI/UX Designer (1 Year Exp.)',
-    company: 'Woo Creative',
-    location: 'New York, USA',
-    salary: '$14K - $25K',
-    type: 'Full Time',
-  })
-
+  
   useGetHomeJobs();
 
   const handleInputChange = async (e: React.ChangeEvent<HTMLInputElement>) => {

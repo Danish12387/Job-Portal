@@ -32,8 +32,6 @@ export default function JobSearchPage() {
         search: '',
     });
 
-    console.log(jobs);
-
     const [jobFilters, setJobFilters] = useState<JobFilters>({
         location: 'all',
         time: 'all-time',
@@ -50,12 +48,14 @@ export default function JobSearchPage() {
     useGetAllJobs();
 
     useEffect(() => {
-        if (q) {
-            const query = { ...srchInputs, ['search']: q };
-            setSrchInputs(query);
-            onChangeJobFilters('searchInputs', query);
-        }
-    }, []);
+        setTimeout(() => {
+            if (q) {
+                const query = { ...srchInputs, ['search']: q };
+                setSrchInputs(query);
+                onChangeJobFilters('searchInputs', query);
+            }
+        }, 100);
+    }, [q]);
 
     useEffect(() => {
         if (hasMore) {
@@ -77,7 +77,7 @@ export default function JobSearchPage() {
         dispatch(incrementPage(1));
         dispatch(setJobFiltersState(jobFilters));
         dispatch(setHasMore(true));
-    }, [jobFilters])
+    }, [jobFilters, q])
 
     useEffect(() => {
         if (srchInputs.search === '' && srchInputs.location === '') {

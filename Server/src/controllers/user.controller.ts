@@ -21,7 +21,7 @@ export const signup = async (req: Request, res: Response): Promise<any> => {
         const userWithouPassword = await User.findOne({ email }).select("-password");
         res.status(201).json({
             success: true,
-            message: "User Registered Successfully",
+            message: "Registered Successfully",
             user: userWithouPassword
         })
 
@@ -450,6 +450,26 @@ export const getUserJobs = async (req: Request, res: Response): Promise<any> => 
             userJobs: userJobs,
         });
 
+    } catch (error) {
+        console.log(error);
+        return res.status(500).json({ message: "Internal Server Error" });
+    }
+}
+
+export const getSuggestedUsers = async (req: Request, res: Response): Promise<any> => {
+    try {
+        const suggestedUsers = await User.find({ _id: { $ne: req.id } }).select("-password");
+        if (!suggestedUsers) {
+            return res.status(400).json({
+                message: 'Currently do not have any users',
+            })
+        };
+
+        return res.status(200).json({
+            success: true,
+            message: "Users fetched successfully",
+            suggestedUsers,
+        })
     } catch (error) {
         console.log(error);
         return res.status(500).json({ message: "Internal Server Error" });

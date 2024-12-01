@@ -1,7 +1,7 @@
 "use client"
 
 import * as React from "react"
-import { Check, ChevronsUpDown } from "lucide-react"
+import { Check, ChevronsUpDown, MapPin } from "lucide-react"
 
 import { cn } from "@/lib/utils"
 import { Button } from "@/components/ui/button"
@@ -281,9 +281,12 @@ export function LocationSelector({ value, setValue }: LocationSelectorProps): JS
                     aria-expanded={open}
                     className="w-full h-12 active:scale-100 justify-between font-light text-sm px-3"
                 >
-                    {value
-                        ? Countries.find((framework) => framework.value === value)?.label
-                        : "Select Country..."}
+                    <div className="flex items-center">
+                        <MapPin className="mr-2 text-gray-500 pointer-events-none" />
+                        {value
+                            ? Countries.find((framework) => framework.value === value)?.label
+                            : "Select Country..."}
+                    </div>
                     <ChevronsUpDown className="ml-2 h-3 w-3 shrink-0 opacity-50" />
                 </Button>
             </PopoverTrigger>
