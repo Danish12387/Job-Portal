@@ -4,25 +4,26 @@ import { Button } from "@/components/ui/button"
 import { Card, CardContent } from "@/components/ui/card"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { ImageIcon, VideoIcon, FileTextIcon } from 'lucide-react'
+import { useAppSelector } from "@/lib/hooks"
 
 export function PostCreator() {
+  const { user } = useAppSelector(state => state.user);
+
   return (
     <Card>
       <CardContent className="p-4">
         <div className="flex gap-4">
-          <Avatar>
-            <AvatarImage src="/placeholder.svg" alt="User" />
-            <AvatarFallback>UN</AvatarFallback>
+          <Avatar className="pointer-events-none">
+            <AvatarImage src={user?.profilePicture || '/dummy-person.jpg'} alt="User" />
+            <AvatarFallback>
+              <img src="/dummy-person.jpg" alt="Profile" />
+            </AvatarFallback>
           </Avatar>
-          <Button variant="outline" className="w-full justify-start text-muted-foreground">
-            Start a post, try writing with AI
+          <Button variant="outline" className="w-full justify-start text-muted-foreground active:scale-100">
+            Start a post
           </Button>
         </div>
-        <div className="mt-4 flex justify-between">
-          <Button variant="ghost" size="sm" className="gap-2">
-            <VideoIcon className="h-4 w-4" />
-            Video
-          </Button>
+        <div className="mt-4 flex justify-around">
           <Button variant="ghost" size="sm" className="gap-2">
             <ImageIcon className="h-4 w-4" />
             Photo
