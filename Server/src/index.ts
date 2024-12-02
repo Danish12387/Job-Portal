@@ -6,6 +6,7 @@ import bodyParser from "body-parser";
 import cookieParser from "cookie-parser";
 import userRoutes from "./routes/user.route";
 import jobRoutes from "./routes/job.route";
+import postRoutes from "./routes/post.route";
 
 dotenv.config();
 
@@ -31,6 +32,7 @@ app.get('/', (req, res) => {
 
 app.use("/api/v1/user", userRoutes);
 app.use("/api/v1/job", jobRoutes);
+app.use("/api/v1/post", postRoutes);
 
 app.listen(PORT, () => {
     connectDB();

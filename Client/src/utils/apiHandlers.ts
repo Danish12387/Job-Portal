@@ -66,6 +66,20 @@ export interface JobResponseData {
     job: Job;
 }
 
+export interface Post {
+    caption: string;
+    image: string;
+    author: string;
+    likes: string[];
+    comments: string[];
+}
+
+export interface PostResponseData {
+    success: boolean;
+    message: string;
+    post: Post;
+}
+
 const API_END_POINT = "http://localhost:8000/api/v1";
 axios.defaults.withCredentials = true;
 
@@ -371,6 +385,23 @@ export async function getUserJobs(): Promise<Job[] | undefined> {
         }
     } catch (error: any) {
         console.log(error);
-        toast.error(error?.resonse?.data?.message || "Something went wrong");
+        toast.error(error?.response?.data?.message || "Something went wrong");
+    }
+}
+
+export async function createPost(data: any): Promise<PostResponseData | undefined> {
+    try {
+        const res = await axios.post(`${API_END_POINT}/post/create-post`, data, {
+            headers: {
+                'Content-Type': 'application/json'
+            },
+        });
+
+        if (res.data.success) {
+            return res.data.post;
+        }
+    } catch (error: any) {
+        console.log(error);
+        toast.error(error?.response?.data?.message || "Something went wrong");
     }
 }

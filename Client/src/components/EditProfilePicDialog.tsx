@@ -5,6 +5,7 @@ import { Button } from "@/components/ui/button"
 import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog"
 import { setUser } from '@/lib/features/user/userSlice'
 import { useAppDispatch } from '@/lib/hooks'
+import { readFile } from "@/lib/utils"
 import { deleteProfilePic, editProfilePic, User } from '@/utils/apiHandlers'
 import { getCroppedImg } from '@/utils/getCroppedImage'
 import { Loader2, Trash2, Upload } from 'lucide-react'
@@ -34,16 +35,8 @@ const EditProfilePicDialog: React.FC<EditProfileDialogProps> = ({ isOwnProfile, 
             const file = e.target.files[0];
             setFileName(file.name);
             const imageDataUrl = await readFile(file)
-            setImageSrc(imageDataUrl)
+            setImageSrc(imageDataUrl);
         }
-    }
-
-    const readFile = (file: File): Promise<string> => {
-        return new Promise((resolve) => {
-            const reader = new FileReader();
-            reader.addEventListener('load', () => resolve(reader.result as string))
-            reader.readAsDataURL(file)
-        })
     }
 
     const handleCropComplete = (croppedAreaPercentage: any, croppedAreaPixels: any) => {

@@ -5,6 +5,7 @@ import { Card, CardContent } from "@/components/ui/card"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { ImageIcon, VideoIcon, FileTextIcon } from 'lucide-react'
 import { useAppSelector } from "@/lib/hooks"
+import CreatePost from "./CreatePost"
 
 export function PostCreator() {
   const { user } = useAppSelector(state => state.user);
@@ -19,9 +20,7 @@ export function PostCreator() {
               <img src="/dummy-person.jpg" alt="Profile" />
             </AvatarFallback>
           </Avatar>
-          <Button variant="outline" className="w-full justify-start text-muted-foreground active:scale-100">
-            Start a post
-          </Button>
+          <CreatePost />
         </div>
         <div className="mt-4 flex justify-around">
           <Button variant="ghost" size="sm" className="gap-2">

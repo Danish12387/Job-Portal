@@ -10,6 +10,7 @@ interface IUser {
     userRole: string;
     lastLogin?: Date;
     jobs?: Types.ObjectId[],
+    posts?: Types.ObjectId[],
     headline?: string,
     websiteLink?: string,
     linkText?: string,
@@ -69,9 +70,14 @@ const userSchema = new mongoose.Schema<IUserDocument>({
     },
     jobs: [
         {
-            type: mongoose.Schema.Types.ObjectId,
+            type: Types.ObjectId,
             ref: 'jobs'
-
+        }
+    ],
+    posts: [
+        {
+            type: Types.ObjectId,
+            ref: 'posts'
         }
     ],
     headline: {
