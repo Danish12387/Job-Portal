@@ -1,4 +1,4 @@
-import { Request, Response } from "express";
+import { Request, RequestHandler, Response } from "express";
 import { User } from "../models/user.model";
 import { generateToken } from "../utils/generateToken";
 import getDataUri from "../utils/datauri";
@@ -21,7 +21,7 @@ export const signup = async (req: Request, res: Response): Promise<any> => {
         const userWithouPassword = await User.findOne({ email }).select("-password");
         res.status(201).json({
             success: true,
-            message: "Registered Successfully",
+            message: "Registered",
             user: userWithouPassword
         })
 
@@ -70,7 +70,7 @@ export const logout = (_: Request, res: Response): any => {
     try {
         return res.clearCookie("token", { path: '/' }).status(200).json({
             success: true,
-            message: "Logged out successfully",
+            message: "Logged out",
         })
     } catch (error) {
         console.log(error);
@@ -82,6 +82,7 @@ export const checkAuth = async (req: Request, res: Response): Promise<any> => {
     try {
         const userId = req.id;
         const user = await User.findById(userId).select("-password");
+        
         if (!user) {
             return res.status(404).json({
                 success: false,
@@ -103,7 +104,8 @@ export const checkAuth = async (req: Request, res: Response): Promise<any> => {
 export const getUserDetails = async (req: Request, res: Response): Promise<any> => {
     try {
         const userId = req.params.id;
-        const user = await User.findById(userId).select("-password").populate({ path: 'jobs', options: { sort: { createdAt: -1 } } });
+
+        const user = await User.findById(userId).select("-password").populate({ path: 'jobs', options: { sort: { createdAt: -1 }, limit: 3 } }).populate({ path: 'posts', options: { sort: { createdAt: -1 }, limit: 3 }, populate: { path: 'author', select: 'fullname profilePicture' } });
 
         if (!user) {
             return res.status(404).json({
@@ -148,7 +150,7 @@ export const editProfile = async (req: Request, res: Response): Promise<any> => 
 
         return res.status(200).json({
             success: true,
-            message: "Profile updated successfully",
+            message: "Profile updated",
             user
         });
     } catch (error) {
@@ -176,7 +178,7 @@ export const editProfileAbout = async (req: Request, res: Response): Promise<any
 
         return res.status(200).json({
             success: true,
-            message: "About updated successfully",
+            message: "About updated",
             user
         });
     } catch (error) {
@@ -205,7 +207,7 @@ export const editHobbies = async (req: Request, res: Response): Promise<any> => 
 
         return res.status(200).json({
             success: true,
-            message: "Hobbies added successfully",
+            message: "Hobbies added",
             user
         });
     } catch (error) {
@@ -267,7 +269,7 @@ export const editAdditionalDetails = async (req: Request, res: Response): Promis
 
         return res.status(200).json({
             success: true,
-            message: "Profile updated successfully",
+            message: "Profile updated",
             user
         });
     } catch (error) {
@@ -306,7 +308,7 @@ export const editProfilePic = async (req: Request, res: Response): Promise<any> 
         await user.save();
         return res.status(200).json({
             success: true,
-            message: "Profile picture updated successfully",
+            message: "Profile picture updated",
             user
         });
 
@@ -344,7 +346,7 @@ export const deleteProfilePic = async (req: Request, res: Response): Promise<any
         await user.save();
         return res.status(200).json({
             success: true,
-            message: "Profile picture deleted successfully",
+            message: "Profile picture deleted",
             user
         });
     } catch (error) {
@@ -383,7 +385,7 @@ export const editProfileBanner = async (req: Request, res: Response): Promise<an
         await user.save();
         return res.status(200).json({
             success: true,
-            message: "Profile banner updated successfully",
+            message: "Profile banner updated",
             user
         });
 
@@ -421,7 +423,7 @@ export const deleteProfileBanner = async (req: Request, res: Response): Promise<
         await user.save();
         return res.status(200).json({
             success: true,
-            message: "Profile banner deleted successfully",
+            message: "Profile banner deleted",
             user
         });
     } catch (error) {
@@ -438,7 +440,7 @@ export const getUserJobs = async (req: Request, res: Response): Promise<any> => 
         if (!user) {
             return res.status(404).json({
                 success: false,
-                message: "User not found",
+                message: "User doesn't exists",
             })
         }
 
@@ -446,7 +448,7 @@ export const getUserJobs = async (req: Request, res: Response): Promise<any> => 
 
         return res.status(200).json({
             success: true,
-            message: "User jobs fetched successfully",
+            message: "User jobs fetched",
             userJobs: userJobs,
         });
 
@@ -467,7 +469,7 @@ export const getSuggestedUsers = async (req: Request, res: Response): Promise<an
 
         return res.status(200).json({
             success: true,
-            message: "Users fetched successfully",
+            message: "Users fetched",
             suggestedUsers,
         })
     } catch (error) {

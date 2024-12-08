@@ -32,7 +32,7 @@ export default function AuthNavbar() {
 
   const navItems = [
     { title: "Start a Search", href: "/job-search" },
-    { title: "Posts", href: "/posts" },
+    { title: "Posts", href: "/feed" },
     { title: "Create Job", href: "/create-job" },
     { title: "Salary estimate", href: "#" },
   ]

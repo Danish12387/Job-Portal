@@ -15,6 +15,7 @@ import { useAppSelector } from "@/lib/hooks";
 import { getUserDetails, User } from "@/utils/apiHandlers";
 import { format, formatDistanceToNowStrict } from 'date-fns';
 import { ExternalLink, MoveRight } from "lucide-react";
+import Image from "next/image";
 import Link from "next/link";
 import { useEffect, useState } from "react";
 
@@ -49,7 +50,7 @@ export default function Component({ params }: { params: { slug: string } }) {
                     <>
                         {renderAbout()}
                         {renderHobbies()}
-                        {/* {renderPosts()} */}
+                        {renderPosts()}
                         {renderJobs()}
                     </>
                 );
@@ -57,8 +58,8 @@ export default function Component({ params }: { params: { slug: string } }) {
                 return renderAbout();
             case 'hobbies':
                 return renderHobbies();
-            // case 'posts':
-            //     return renderPosts();
+            case 'posts':
+                return renderPosts();
             case 'jobs':
                 return renderJobs();
             case 'events':
@@ -108,33 +109,40 @@ export default function Component({ params }: { params: { slug: string } }) {
         </Card>
     );
 
-    // const renderPosts = () => (
-    //     <div className="space-y-4">
-    //         <div className="flex justify-between items-center">
-    //             <h2 className="text-lg font-semibold">Posts</h2>
-    //             <Button variant="link" className="text-gray-500">
-    //                 View All
-    //             </Button>
-    //         </div>
-    //         {userDetails?.posts && userDetails?.posts.length > 0 ? (
-    //             userDetails?.posts.map((post) => (
-    //                 <Card key={post.title + post.author} className="p-4">
-    //                     <div className="flex justify-between items-start">
-    //                         <div>
-    //                             <h3 className="font-medium">{post.title}</h3>
-    //                             <p className="text-sm text-gray-500">{post.author}</p>
-    //                             <p className="text-sm text-gray-500">{post.date}</p>
-    //                         </div>
-    //                         <Image src={post.image} alt="Post thumbnail" width={80} height={80} className="rounded-lg" />
-    //                     </div>
-    //                 </Card>
-    //             ))
-    //         ) : (
-    //             <p className="text-gray-600">No posts yet.</p>
-    //         )
-    //         }
-    //     </div>
-    // );
+    const renderPosts = () => (
+        <div className="space-y-4">
+            <div className="flex justify-between items-center">
+                <h2 className="text-lg font-semibold">Posts</h2>
+                <Button variant="link" className="text-gray-500">
+                    View All
+                </Button>
+            </div>
+            {userDetails?.posts && userDetails?.posts.length > 0 ? (
+                userDetails?.posts.map((post) => (
+                    <Card key={post?._id} className="p-4">
+                        <div className="flex justify-between items-center">
+                            <div className="flex flex-col justify-between max-w-[75%] h-full">
+                                <div>
+                                    <h3 className="font-medium line-clamp-2 ">{post?.caption}</h3>
+                                    <p className="text-sm text-gray-500">{post?.author?.fullname}</p>
+                                </div>
+                                <p className="text-sm text-gray-500">
+                                    {post?.createdAt
+                                        ? `${formatDistanceToNowStrict(new Date(post.createdAt), { addSuffix: true })}`
+                                        : 'N/A'
+                                    }
+                                </p>
+                            </div>
+                            <img src={post?.image} alt="Post thumbnail" width={80} height={80} className="rounded-lg" />
+                        </div>
+                    </Card>
+                ))
+            ) : (
+                <p className="text-gray-600">No posts yet.</p>
+            )
+            }
+        </div>
+    );
 
     const renderJobs = () => (
         <div className="space-y-4">
@@ -154,7 +162,7 @@ export default function Component({ params }: { params: { slug: string } }) {
                                 <p className="text-sm text-gray-500 line-clamp-2">{job?.jobDescription}</p>
                                 <p className="text-sm text-gray-500">
                                     {job?.createdAt
-                                        ? `${formatDistanceToNowStrict(new Date(job.createdAt), { addSuffix: true })}, on ${format(new Date(job.createdAt), 'MM/dd/yyyy')}`
+                                        ? `${formatDistanceToNowStrict(new Date(job.createdAt), { addSuffix: true })}`
                                         : 'N/A'
                                     }
                                 </p>

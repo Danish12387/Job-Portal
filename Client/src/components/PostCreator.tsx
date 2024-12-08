@@ -22,16 +22,6 @@ export function PostCreator() {
           </Avatar>
           <CreatePost />
         </div>
-        <div className="mt-4 flex justify-around">
-          <Button variant="ghost" size="sm" className="gap-2">
-            <ImageIcon className="h-4 w-4" />
-            Photo
-          </Button>
-          <Button variant="ghost" size="sm" className="gap-2">
-            <FileTextIcon className="h-4 w-4" />
-            Write article
-          </Button>
-        </div>
       </CardContent>
     </Card>
   )

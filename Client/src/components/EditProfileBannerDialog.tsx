@@ -130,7 +130,7 @@ const EditProfileBannerDialog: React.FC<EditProfileDialogProps> = ({ isOwnProfil
                         </div>
                     ) : (
                         <div className="flex flex-col items-center justify-center gap-2 h-80">
-                            <img src={userDetails?.profileBanner || '/dummy-banner.jpg'} alt="Profile" className="w-full h-60 object-cover border-4 border-white rounded-lg pointer-events-none" />
+                            <img src={userDetails?.profileBanner || '/dummy-banner.jpg'} alt="Profile" className="w-full h-auto object-cover border-4 border-white rounded-lg pointer-events-none" />
                         </div>
                     )}
                 </div>

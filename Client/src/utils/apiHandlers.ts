@@ -16,6 +16,7 @@ export interface User {
     userRole: string;
     lastLogin: Date;
     jobs?: Job[];
+    posts?: Post[];
     headline?: string;
     websiteLink?: string;
     linkText?: string;
@@ -66,12 +67,23 @@ export interface JobResponseData {
     job: Job;
 }
 
+interface author {
+    _id: string;
+    fullname: string;
+    profilePicture: string;
+    headline: string;
+}
+
 export interface Post {
+    _id: string;
     caption: string;
     image: string;
-    author: string;
+    author: author;
     likes: string[];
     comments: string[];
+    createdAt: Date;
+    updatedAt: Date;
+    __v: number;
 }
 
 export interface PostResponseData {
@@ -393,13 +405,24 @@ export async function createPost(data: any): Promise<PostResponseData | undefine
     try {
         const res = await axios.post(`${API_END_POINT}/post/create-post`, data, {
             headers: {
-                'Content-Type': 'application/json'
+                'Content-Type': 'multipart/form-data'
             },
         });
 
         if (res.data.success) {
+            toast.success(res.data.message);
             return res.data.post;
         }
+    } catch (error: any) {
+        console.log(error);
+        toast.error(error?.response?.data?.message || "Something went wrong");
+    }
+}
+
+export async function likeHandler(id: string) {
+    try {
+        await axios.get(`${API_END_POINT}/post/${id}/likeDislike`);
+
     } catch (error: any) {
         console.log(error);
         toast.error(error?.response?.data?.message || "Something went wrong");

@@ -13,14 +13,15 @@ import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, 
 import React, { useEffect, useState } from 'react'
 import { Button } from "./ui/button";
 import { useRouter, useSearchParams } from "next/navigation";
-import { Loader2, Upload, X } from "lucide-react";
+import { FileTextIcon, ImageIcon, Loader2, Upload, X } from "lucide-react";
 import { Textarea } from "./ui/textarea";
 import { Label } from "./ui/label";
 import { readFile } from "@/lib/utils";
+import { createPost } from "@/utils/apiHandlers";
 
 interface Post {
     caption: string;
-    image: string;
+    image: File | null;
 }
 
 const CreatePost = () => {
@@ -31,8 +32,9 @@ const CreatePost = () => {
     const [showWarning, setShowWarning] = useState(false);
     const [input, setInput] = useState<Post>({
         caption: '',
-        image: '',
+        image: null,
     });
+    const [imagePreview, setImagePreview] = useState("");
     const [initialForm, setInitialForm] = useState<Post>(input);
 
     useEffect(() => {
@@ -47,11 +49,19 @@ const CreatePost = () => {
         setInitialForm(input);
     }, []);
 
+    useEffect(() => {
+        if (!input.image && !input.caption) {
+            setInput(initialForm);
+            setImagePreview('');
+        }
+    }, [input]);
+
     const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
         if (e?.target?.files && e.target?.files?.length > 0) {
             const file = e?.target?.files[0];
+            setInput({ ...input, image: file });
             const imageDataUrl = await readFile(file)
-            setInput({ ...input, image: imageDataUrl });
+            setImagePreview(imageDataUrl);
         }
     }
 
@@ -66,32 +76,68 @@ const CreatePost = () => {
     };
 
     const openDialog = () => {
-        router.push(`/posts?create=post`);
+        router.push(`/feed?create=post`);
     };
 
     const closeDialog = () => {
         if (isFormDirty()) {
             setShowWarning(true);
         } else {
-            router.push(`/posts`);
+            router.push(`/feed`);
         }
     };
 
     const handleDiscard = () => {
         setInput(initialForm);
         setShowWarning(false);
-        router.push(`/posts`);
+        router.push(`/feed`);
     };
 
     const handleKeepEditing = () => {
         setShowWarning(false);
     };
 
+    const handleCreatePost = async () => {
+        try {
+            setLoading(true);
+            if (!input.image && !input.caption) {
+                throw new Error('Post cannot be empty');
+            }
+
+            const res = await createPost(input);
+            if (res) {
+                setInput(initialForm);
+                setImagePreview('');
+                setIsOpen(false);
+                router.push(`/feed`);
+            } else {
+                throw new Error('Failed to update profile');
+            }
+        } catch (error) {
+            console.error('Something went wrong');
+            console.error(error);
+        } finally {
+            setLoading(false);
+        }
+    }
+
     return (
         <>
-            <Button onClick={openDialog} variant="outline" className="w-full justify-start text-muted-foreground active:scale-100">
-                Start a post
-            </Button>
+            <div className="w-full">
+                <Button onClick={openDialog} variant="outline" className="w-full justify-start text-muted-foreground active:scale-100">
+                    Start a post
+                </Button>
+                <div className="mt-4 flex justify-around">
+                    <Button onClick={openDialog} variant="ghost" size="sm" className="gap-2">
+                        <ImageIcon className="h-4 w-4" />
+                        Photo
+                    </Button>
+                    <Button onClick={openDialog} variant="ghost" size="sm" className="gap-2">
+                        <FileTextIcon className="h-4 w-4" />
+                        Write article
+                    </Button>
+                </div>
+            </div>
             <Dialog open={isOpen} onOpenChange={closeDialog}>
                 <DialogContent className="max-w-[700px] max-h-[600px] h-[80%] border-none p-0 flex flex-col">
                     <DialogHeader className='border-b w-full p-4 h-20'>
@@ -101,7 +147,7 @@ const CreatePost = () => {
                         </DialogDescription>
                     </DialogHeader>
                     <div className='overflow-y-auto h-full'>
-                        <div className={`flex flex-col gap-4 px-6 h-full ${input.image ? 'justify-normal pb-0' : 'justify-between pb-6'}`}>
+                        <div className={`flex flex-col gap-4 px-6 h-full ${imagePreview ? 'justify-normal' : 'justify-between'}`}>
                             <div className="flex flex-col justify-start gap-2">
                                 <Label htmlFor="name" className="font-semibold text-lg">
                                     Caption
@@ -109,46 +155,45 @@ const CreatePost = () => {
                                 <Textarea id="name" value={input.caption} onChange={handleInputChange} name="caption" className="h-32 border-none" placeholder="Enter caption for your post" />
                             </div>
                             <DialogFooter>
-                                {
-                                    input.image ?
+                                <div className="flex flex-col items-center gap-10 pb-6 w-full">
+                                    {
+                                        imagePreview &&
                                         (
-                                            <div className="flex w-full items-center justify-center gap-2 relative mb-6">
-                                                <X className="absolute bg-gray-200 hover:bg-gray-300 transition p-2 h-10 rounded-full w-10 top-2 right-2 cursor-pointer" onClick={() => setInput({ ...input, image: '' })} />
-                                                <div className="my-auto h-80">
-                                                    <img src={input.image} alt="Profile" className="w-full h-auto rounded-lg pointer-events-none" />
+                                            <div className="flex w-full min-h-96 justify-center relative bg-gray-300 max-h-[500px]">
+                                                <X className="absolute bg-gray-200 hover:bg-gray-300 transition p-2 h-10 rounded-full w-10 top-2 right-2 cursor-pointer" onClick={() => { setInput({ ...input, image: null }); setImagePreview('') }} />
+                                                <div className="my-auto h-full flex items-center">
+                                                    <img src={imagePreview} alt="Profile" className="w-full h-auto rounded-lg pointer-events-none max-h-[500px]" />
                                                 </div>
                                             </div>
                                         )
-                                        :
-                                        (
-                                            <div className='flex justify-between items-center w-full'>
-                                                <div className='flex justify-between items-center gap-5'>
-                                                    <label htmlFor="upload-photo" className="flex items-center gap-2 cursor-pointer">
-                                                        <Upload className="w-5 h-5" />
-                                                        <span>Upload Photo</span>
-                                                        <input
-                                                            type="file"
-                                                            id="upload-photo"
-                                                            accept="image/*"
-                                                            onChange={handleFileChange}
-                                                            className="hidden"
-                                                        />
-                                                    </label>
-                                                </div>
-                                                {
-                                                    loading ?
-                                                        <Button disabled>
-                                                            <Loader2 className='mr-2 h-4 w-4 animate-spin' />
-                                                            Posting...
-                                                        </Button>
-                                                        :
-                                                        <Button disabled={!isFormDirty()}>
-                                                            Create Post
-                                                        </Button>
-                                                }
-                                            </div>
-                                        )
-                                }
+                                    }
+                                    <div className='flex justify-between items-center w-full'>
+                                        <div className='flex justify-between items-center gap-5'>
+                                            <label htmlFor="upload-photo" className="flex items-center gap-2 cursor-pointer hover:text-primary transition duration-300">
+                                                <Upload className="w-5 h-5" />
+                                                <span>Upload Photo</span>
+                                                <input
+                                                    type="file"
+                                                    id="upload-photo"
+                                                    accept="image/*"
+                                                    onChange={handleFileChange}
+                                                    className="hidden"
+                                                />
+                                            </label>
+                                        </div>
+                                        {
+                                            loading ?
+                                                <Button disabled>
+                                                    <Loader2 className='mr-2 h-4 w-4 animate-spin' />
+                                                    Creating...
+                                                </Button>
+                                                :
+                                                <Button disabled={!isFormDirty()} onClick={handleCreatePost}>
+                                                    Create Post
+                                                </Button>
+                                        }
+                                    </div>
+                                </div>
                             </DialogFooter>
                         </div>
                     </div>

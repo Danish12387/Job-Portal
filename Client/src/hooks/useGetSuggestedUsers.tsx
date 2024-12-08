@@ -10,7 +10,9 @@ const GetSuggestedUsers = () => {
     useEffect(() => {
         const fetchedSuggestedUsers = async () => {
             try {
-                const res = await axios.get(`${API_END_POINT1}/user/get-suggested-users`);
+                const res = await axios.get(`${API_END_POINT1}/user/get-suggested-users`, {
+                    withCredentials: true,
+                });
                 if (res.data.success) {
                     dispatch(setSuggestedUsers(res.data.suggestedUsers));
                 }

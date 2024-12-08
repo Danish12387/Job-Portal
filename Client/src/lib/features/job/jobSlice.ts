@@ -22,8 +22,8 @@ interface JobState {
     jobDetails: Job | null;
     totalJobs: number;
     page: number;
-    hasMore: boolean,
-    jobLoading: boolean,
+    hasMore: boolean;
+    jobLoading: boolean;
 }
 
 const initialState: JobState = {
