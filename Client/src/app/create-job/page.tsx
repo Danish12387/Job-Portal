@@ -17,7 +17,7 @@ import toast from "react-hot-toast";
 import { CircleMinus, Loader2 } from "lucide-react"
 import { useAppDispatch, useAppSelector } from "@/lib/hooks"
 import Loader from "@/components/Loader/Loader"
-import useCheckAuth from "@/hooks/useCheckAuth"
+import useCheckAuth from "@/hooks/useCheckAuth";
 
 export default function JobPostingForm() {
     const [input, setInput] = useState<jobPostSchemaType>({
@@ -38,6 +38,7 @@ export default function JobPostingForm() {
         requirements: [''],
         responsibilities: [''],
     });
+    const [initialForm, setInitialForm] = useState<jobPostSchemaType>(input);
     const [errors, setErrors] = useState<Partial<jobPostSchemaType>>({});
     const [date, setDate] = useState<Date>();
     const [value, setValue] = useState<string>("");
@@ -96,6 +97,10 @@ export default function JobPostingForm() {
             })
         }
     }, [date]);
+
+    const isFormDirty = () => {
+        return JSON.stringify(input) !== JSON.stringify(initialForm);
+    };
 
     const errorHandler = (name: string, value: string | string[]): void => {
         setErrors((prevErrors: Partial<jobPostSchemaType>) => {
@@ -359,7 +364,7 @@ export default function JobPostingForm() {
                                 <Loader2 className="mr-2 h-4 w-4 animate-spin" /> Please wait
                             </Button>
                         ) : (
-                            <Button type="submit" className="hover:scale-105 px-10">
+                            <Button type="submit" disabled={!isFormDirty()} className="hover:scale-105 px-10">
                                 Post Job
                             </Button>
                         )}

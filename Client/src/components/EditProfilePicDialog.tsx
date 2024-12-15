@@ -8,7 +8,7 @@ import { useAppDispatch } from '@/lib/hooks'
 import { readFile } from "@/lib/utils"
 import { deleteProfilePic, editProfilePic, User } from '@/utils/apiHandlers'
 import { getCroppedImg } from '@/utils/getCroppedImage'
-import { Loader2, Trash2, Upload } from 'lucide-react'
+import { ImagePlus, Loader2, Trash2 } from 'lucide-react'
 import React, { useState } from 'react'
 import Cropper from 'react-easy-crop'
 import toast from "react-hot-toast"
@@ -136,7 +136,7 @@ const EditProfilePicDialog: React.FC<EditProfileDialogProps> = ({ isOwnProfile, 
                             <div className='flex justify-between items-center w-full'>
                                 <div className='flex justify-between items-center gap-5'>
                                     <label htmlFor="upload-photo" className="flex items-center gap-2 cursor-pointer">
-                                        <Upload className="w-5 h-5" />
+                                    <ImagePlus className="w-6 h-6" />
                                         <span>Upload Photo</span>
                                         <input
                                             type="file"

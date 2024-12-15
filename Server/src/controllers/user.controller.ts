@@ -21,7 +21,7 @@ export const signup = async (req: Request, res: Response): Promise<any> => {
         const userWithouPassword = await User.findOne({ email }).select("-password");
         res.status(201).json({
             success: true,
-            message: "Registered",
+            message: "Account Registered",
             user: userWithouPassword
         })
 
@@ -82,7 +82,7 @@ export const checkAuth = async (req: Request, res: Response): Promise<any> => {
     try {
         const userId = req.id;
         const user = await User.findById(userId).select("-password");
-        
+
         if (!user) {
             return res.status(404).json({
                 success: false,

@@ -244,6 +244,7 @@ const EditJobDialog: React.FC<EditProfileDialogProps> = ({ jobDetails }) => {
                     dispatch(setUserJobsState(response));
                 }
                 setIsOpen(false);
+                router.push(`/manage-jobs`);
             }
 
         } catch (error) {

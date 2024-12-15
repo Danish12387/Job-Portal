@@ -16,7 +16,7 @@ const geistMono = localFont({
 });
 
 export const metadata: Metadata = {
-  title: "Job Portal",
+  title: "Job Nexus",
   description: "Developed by Danish Shah",
 };
 

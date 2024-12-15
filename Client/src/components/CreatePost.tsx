@@ -13,7 +13,7 @@ import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, 
 import React, { useEffect, useState } from 'react'
 import { Button } from "./ui/button";
 import { useRouter, useSearchParams } from "next/navigation";
-import { FileTextIcon, ImageIcon, Loader2, Upload, X } from "lucide-react";
+import { FileTextIcon, ImageIcon, ImagePlus, Loader2, Upload, X } from "lucide-react";
 import { Textarea } from "./ui/textarea";
 import { Label } from "./ui/label";
 import { readFile } from "@/lib/utils";
@@ -170,7 +170,7 @@ const CreatePost = () => {
                                     <div className='flex justify-between items-center w-full'>
                                         <div className='flex justify-between items-center gap-5'>
                                             <label htmlFor="upload-photo" className="flex items-center gap-2 cursor-pointer hover:text-primary transition duration-300">
-                                                <Upload className="w-5 h-5" />
+                                                <ImagePlus className="w-6 h-6" />
                                                 <span>Upload Photo</span>
                                                 <input
                                                     type="file"

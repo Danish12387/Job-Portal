@@ -43,7 +43,7 @@ const NotAuthNavbar = () => {
             <div className='flex items-center justify-between container mx-auto'>
                 <Link href={`/`} className='flex items-center justify-between gap-2 cursor-pointer'>
                     <img className='w-10' src="/logo.png" alt="Logo" />
-                    <h1 className='font-semibold text-xl'>Jobless</h1>
+                    <h1 className='font-semibold text-xl'>Job Nexus</h1>
                 </Link>
                 <div className="hidden sm:flex">
                     {renderAuthButton()}

@@ -31,10 +31,10 @@ export default function AuthNavbar() {
   }
 
   const navItems = [
+    { title: "Home", href: "/" },
     { title: "Start a Search", href: "/job-search" },
     { title: "Posts", href: "/feed" },
     { title: "Create Job", href: "/create-job" },
-    { title: "Salary estimate", href: "#" },
   ]
 
   return (
@@ -42,7 +42,7 @@ export default function AuthNavbar() {
       <div className='flex items-center justify-between container mx-auto'>
         <Link href={`/`} className='flex items-center justify-between gap-2 cursor-pointer'>
           <img className='w-10' src="/logo.png" alt="Logo" />
-          <h1 className='font-semibold text-xl'>Jobless</h1>
+          <h1 className='font-semibold text-xl'>JobNexus</h1>
         </Link>
         <div className='hidden md:flex items-center gap-10 text-[15px]'>
           {navItems.map((item, index) => (

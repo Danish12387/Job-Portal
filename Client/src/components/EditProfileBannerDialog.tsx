@@ -1,14 +1,14 @@
 'use client'
 
-import React, { useState } from 'react'
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger, DialogFooter } from "@/components/ui/dialog"
 import { Button } from "@/components/ui/button"
-import { Loader2, Trash2, Upload } from 'lucide-react'
-import Cropper from 'react-easy-crop'
-import { getCroppedImg } from '@/utils/getCroppedImage';
-import { deleteProfileBanner, editProfileBanner, User } from '@/utils/apiHandlers';
+import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog"
 import { setUser } from '@/lib/features/user/userSlice'
 import { useAppDispatch } from '@/lib/hooks'
+import { deleteProfileBanner, editProfileBanner, User } from '@/utils/apiHandlers'
+import { getCroppedImg } from '@/utils/getCroppedImage'
+import { ImagePlus, Loader2, Trash2 } from 'lucide-react'
+import React, { useState } from 'react'
+import Cropper from 'react-easy-crop'
 import toast from 'react-hot-toast'
 
 interface EditProfileDialogProps {
@@ -141,7 +141,7 @@ const EditProfileBannerDialog: React.FC<EditProfileDialogProps> = ({ isOwnProfil
                             <div className='flex justify-between items-center w-full'>
                                 <div className='flex justify-between items-center gap-5'>
                                     <label htmlFor="upload-photo" className="flex items-center gap-2 cursor-pointer">
-                                        <Upload className="w-5 h-5" />
+                                        <ImagePlus className="w-6 h-6" />
                                         <span>Upload Photo</span>
                                         <input
                                             type="file"
