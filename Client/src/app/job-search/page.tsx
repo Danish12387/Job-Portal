@@ -14,15 +14,18 @@ import { incrementPage, JobFilters, setHasMore, setJobFiltersState, setJobLoadin
 import { useAppDispatch, useAppSelector } from '@/lib/hooks';
 import { Job } from '@/utils/apiHandlers';
 import { Search, X } from 'lucide-react';
-import { ChangeEvent, FormEvent, useEffect, useState } from 'react';
+import { useRouter, useSearchParams } from 'next/navigation';
+import { ChangeEvent, FormEvent, useCallback, useEffect, useState } from 'react';
 import InfiniteScroll from 'react-infinite-scroll-component';
-import { useSearchParams, useRouter } from 'next/navigation';
 
 export default function JobSearchPage() {
     const dispatch = useAppDispatch();
     const searchParams = useSearchParams();
     const router = useRouter();
-    const q = searchParams.get('q');
+
+    const allParams = Object.fromEntries(searchParams.entries());
+
+    console.log(allParams);
 
     const { jobs, page, hasMore, jobLoading, totalJobs } = useAppSelector(state => state.jobs);
     const { user } = useAppSelector(state => state.user);
@@ -48,16 +51,6 @@ export default function JobSearchPage() {
     useGetAllJobs();
 
     useEffect(() => {
-        setTimeout(() => {
-            if (q) {
-                const query = { ...srchInputs, ['search']: q };
-                setSrchInputs(query);
-                onChangeJobFilters('searchInputs', query);
-            }
-        }, 100);
-    }, [q]);
-
-    useEffect(() => {
         if (hasMore) {
             setNewJobs(jobs);
         }
@@ -77,16 +70,54 @@ export default function JobSearchPage() {
         dispatch(incrementPage(1));
         dispatch(setJobFiltersState(jobFilters));
         dispatch(setHasMore(true));
-    }, [jobFilters, q])
+    }, [searchParams]);
 
     useEffect(() => {
         if (srchInputs.search === '' && srchInputs.location === '') {
-            onChangeJobFilters('searchInputs', { ...srchInputs });
-            if (q) {
-                router.push('/job-search');
-            }
+            updateFilters('searchInputs', { ...srchInputs });
         }
     }, [srchInputs]);
+
+    const updateFilters = useCallback((name: string, value: string | string[] | searchInputsInterface | undefined) => {
+        const params = new URLSearchParams(searchParams.toString());
+
+        if (Array.isArray(value)) {
+            params.delete(name);
+            value.forEach(v => params.append(name, v));
+        } else if (typeof value === 'object' && value !== null) {
+            Object.entries(value).forEach(([key, val]) => {
+                if (val) params.set(key, val.toString());
+                else params.delete(key);
+            });
+        } else if (value) {
+            params.set(name, value.toString());
+        } else {
+            params.delete(name);
+        }
+
+        router.push(`/job-search?${params.toString()}`);
+        setJobFilters(prevFilters => ({
+            ...prevFilters,
+            [name]: value
+        }));
+    }, [searchParams, router]);
+
+    useEffect(() => {
+        if (allParams) {
+            setJobFilters({
+                ...jobFilters,
+                ...allParams
+            });
+        }
+    }, [updateFilters, searchParams]);
+
+    console.log(jobFilters, 'jobFilters')
+
+    // useEffect(() => {
+    //         const query = { ...srchInputs, ['search']: allParams.search };
+    //         setSrchInputs(query);
+    //         updateFilters('searchInputs', query);
+    // }, [updateFilters]);
 
     const loadMoreJobs = () => {
         dispatch(incrementPage(page + 1));
@@ -106,39 +137,38 @@ export default function JobSearchPage() {
 
     const filterLocation = (value: string) => {
         if (value === 'near-me') {
-
-            onChangeJobFilters('location', user?.city);
+            updateFilters('location', user?.city);
         } else {
-            onChangeJobFilters('location', value);
+            updateFilters('location', value);
         }
 
     };
 
     const filterTime = (value: string) => {
-        onChangeJobFilters('time', value);
+        updateFilters('time', value);
     };
 
     const filterWorkEx = (value: string) => {
-        onChangeJobFilters('workExperience', value);
+        updateFilters('workExperience', value);
     }
 
     const filterSalary = (value: string) => {
         if (jobFilters.salary === value) {
-            onChangeJobFilters('salary', 'all');
+            updateFilters('salary', 'all');
         } else {
-            onChangeJobFilters('salary', value);
+            updateFilters('salary', value);
         }
     };
 
     const toggleJobType = (jobType: string) => {
         if (jobFilters.selectedJobTypes.includes(jobType)) {
             const filteredJobTypes = jobFilters.selectedJobTypes.filter(type => type !== jobType);
-            onChangeJobFilters('selectedJobTypes', filteredJobTypes);
+            updateFilters('selectedJobTypes', filteredJobTypes);
         } else {
             if (jobFilters.selectedJobTypes.includes('')) {
-                onChangeJobFilters('selectedJobTypes', [jobType]);
+                updateFilters('selectedJobTypes', [jobType]);
             } else {
-                onChangeJobFilters('selectedJobTypes', [...jobFilters.selectedJobTypes, jobType]);
+                updateFilters('selectedJobTypes', [...jobFilters.selectedJobTypes, jobType]);
             }
         }
     };
@@ -154,11 +184,11 @@ export default function JobSearchPage() {
 
     const submitSearchHandler = (e: FormEvent<HTMLFormElement>) => {
         e.preventDefault();
-        onChangeJobFilters('searchInputs', { ...srchInputs });
+        updateFilters('searchInputs', { ...srchInputs });
     }
 
     const selectValueChange = (value: string) => {
-        onChangeJobFilters('selectValue', value);
+        updateFilters('selectValue', value);
     }
 
     return (
@@ -314,7 +344,7 @@ export default function JobSearchPage() {
                                 next={loadMoreJobs}
                                 hasMore={hasMore}
                                 loader={jobLoading && Array(6).fill(0).map((_, index) => <JobCardSkeleton key={index} />)}
-                                endMessage={<p className='text-center text-gray-600'>No more jobs to load</p>}>
+                                endMessage={jobs.length && <p className='text-center text-gray-600'>No more jobs to load</p>}>
                                 {
                                     jobs.length > 0 ? (
                                         newJobs.length > 0 ? (
@@ -362,6 +392,6 @@ export default function JobSearchPage() {
                     </div>
                 </div>
             </div>
-        </MainLayout>
+        </MainLayout >
     )
 }
