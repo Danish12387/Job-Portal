@@ -2,8 +2,13 @@
 import { Button } from "@/components/ui/button"
 import Link from "next/link"
 import { Ghost, Home, RefreshCcw } from 'lucide-react'
+import { useEffect } from "react"
 
 export default function NotFound() {
+    useEffect(()=>{
+        document.title = "404 | Page Not Found"
+    },[]);
+
     return (
         <div className="min-h-screen bg-gradient-to-b from-blue-100 to-purple-100 flex flex-col items-center justify-center p-4">
             <div className="text-center">
