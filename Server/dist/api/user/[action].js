@@ -6,6 +6,9 @@ import connectDB from "../../config/db.js";
 export default async function handler(req, res) {
     const { action } = req.query;
     await connectDB();
+    if(req.method === "GET") {
+        return res.status(405).json({ error: "This is get method" });
+    }
     if (req.method === "POST") {
         if (action === "signup") {
             try {
