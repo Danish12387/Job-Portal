@@ -1,7 +1,7 @@
 import express from 'express';
 import { checkAuth, deleteProfileBanner, deleteProfilePic, editAdditionalDetails, editHobbies, editProfile, editProfileAbout, editProfileBanner, editProfilePic, getSuggestedUsers, getUserDetails, getUserJobs, login, logout, signup } from '../controllers/user.controller';
 import { isAuthenticated } from '../middlewares/isAuthenticated';
-import upload from "../middlewares/multer.js";
+import upload from "../middlewares/multer";
 
 const router = express.Router();
 

@@ -1,7 +1,71 @@
-import { User } from "../models/user.model";
-import { generateToken } from "../utils/generateToken.js";
-import getDataUri from "../utils/datauri.js";
-import cloudinary from "../utils/cloudinary.js";
+import { User } from "../../models/user.model.js";
+import { generateToken } from "../../utils/generateToken.js";
+import getDataUri from "../../utils/datauri.js";
+import cloudinary from "../../utils/cloudinary.js";
+import connectDB from "../../config/db.js";
+export default async function handler(req, res) {
+    const { action } = req.query;
+    await connectDB();
+    if (req.method === "POST") {
+        if (action === "signup") {
+            try {
+                const { email } = req.body;
+                let user = await User.findOne({ email });
+                if (user) {
+                    return res.status(400).json({
+                        success: false,
+                        message: "Email already exists"
+                    });
+                }
+                user = await User.create(req.body);
+                generateToken(res, user);
+                const userWithouPassword = await User.findOne({ email }).select("-password");
+                res.status(201).json({
+                    success: true,
+                    message: "Account Registered",
+                    user: userWithouPassword
+                });
+            }
+            catch (error) {
+                console.log(error);
+                return res.status(500).json({ message: "Internal Server Error" });
+            }
+        }
+        if (action === "login") {
+            try {
+                const { email, password } = req.body;
+                const user = await User.findOne({ email });
+                if (!user) {
+                    return res.status(400).json({
+                        success: false,
+                        message: "Incorrect email or password"
+                    });
+                }
+                const isPasswordMatch = user.comparePassword(password);
+                if (!isPasswordMatch) {
+                    return res.status(400).json({
+                        success: false,
+                        message: "Incorrect email or password"
+                    });
+                }
+                generateToken(res, user);
+                user.lastLogin = new Date();
+                await user.save();
+                const userWithouPassword = await User.findOne({ email }).select("-password");
+                return res.status(200).json({
+                    success: true,
+                    message: `Welcome back ${user.fullname}`,
+                    user: userWithouPassword
+                });
+            }
+            catch (error) {
+                console.log(error);
+                return res.status(500).json({ message: "Internal Server Error" });
+            }
+        }
+    }
+    return res.status(405).json({ error: "Method not allowed" });
+}
 export const signup = async (req, res) => {
     try {
         const { email } = req.body;

@@ -30,9 +30,9 @@ app.get('/', (req, res) => {
     })
 })
 
-app.use("/api/v1/user", userRoutes);
-app.use("/api/v1/job", jobRoutes);
-app.use("/api/v1/post", postRoutes);
+// app.use("/api/user", userRoutes);
+// app.use("/api/job", jobRoutes);
+// app.use("/api/post", postRoutes);
 
 app.listen(PORT, () => {
     connectDB();

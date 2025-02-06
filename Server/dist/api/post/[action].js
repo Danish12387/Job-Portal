@@ -1,7 +1,7 @@
-import cloudinary from "../utils/cloudinary.js";
-import { Post } from "../models/post.model.js";
+import cloudinary from "../../utils/cloudinary.js";
+import { Post } from "../../models/post.model.js";
 import mongoose from "mongoose";
-import { User } from "../models/user.model.js";
+import { User } from "../../models/user.model.js";
 import sharp from "sharp";
 export const createPost = async (req, res) => {
     try {

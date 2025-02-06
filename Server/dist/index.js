@@ -1,12 +1,9 @@
 import express from "express";
 import dotenv from 'dotenv';
 import cors from 'cors';
+import connectDB from "./config/db.js";
 import bodyParser from "body-parser";
 import cookieParser from "cookie-parser";
-import connectDB from './config/db.js';
-import userRoutes from "./routes/user.route.js";
-import jobRoutes from "./routes/job.route.js";
-import postRoutes from "./routes/post.route.js";
 dotenv.config();
 const app = express();
 const PORT = process.env.PORT || 3000;
@@ -24,9 +21,9 @@ app.get('/', (req, res) => {
         message: "Welcome to the API"
     });
 });
-app.use("/api/v1/user", userRoutes);
-app.use("/api/v1/job", jobRoutes);
-app.use("/api/v1/post", postRoutes);
+// app.use("/api/user", userRoutes);
+// app.use("/api/job", jobRoutes);
+// app.use("/api/post", postRoutes);
 app.listen(PORT, () => {
     connectDB();
     console.log(`Server listen at port ${PORT}`);
