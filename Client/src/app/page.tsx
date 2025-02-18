@@ -1,32 +1,48 @@
 'use client'
 import MainLayout from "@/components/MainLayout";
-import { Button } from "@/components/ui/button"
+import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { MoveRight, Search } from "lucide-react";
-import Image from "next/image";
+import useGetHomeJobs from "@/hooks/useGetHomeJobs";
+import { useAppSelector } from "@/lib/hooks";
+import { createJob, getSearchedJobs, Job } from "@/utils/apiHandlers";
+import { Loader2, MoveRight, Search } from "lucide-react";
 import { NextPage } from "next";
 import Link from "next/link";
-import { createJob, getSearchedJobs, Job } from "@/utils/apiHandlers";
-import { useAppSelector } from "@/lib/hooks";
-import useGetHomeJobs from "@/hooks/useGetHomeJobs";
-import { useState } from "react";
 import { useRouter } from 'next/navigation';
+import { useState, useCallback } from "react";
+import debounce from "lodash/debounce";
+import { motion } from "framer-motion";
 
 const Home: NextPage = () => {
   const { homeJobs } = useAppSelector(state => state.jobs);
   const [isOpen, setIsOpen] = useState(false);
   const [searchTerm, setSearchTerm] = useState('');
   const [searchJobs, setSearchJobs] = useState([]);
+  const [loading, setLoading] = useState<boolean>(false);
   const router = useRouter();
   const categories = Array(10).fill('Technology');
-  
+
   useGetHomeJobs();
 
+  const fetchSearchedJobs = useCallback(
+    debounce(async (query: string) => {
+      if (!query) {
+        setSearchJobs([]);
+        return;
+      }
+      const res = await getSearchedJobs(query);
+      setSearchJobs(res?.job);
+      setLoading(false);
+    }, 500),
+    []
+  );
+
   const handleInputChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
-    setSearchTerm(e.target.value);
-    setIsOpen(e.target.value.length > 0);
-    const res = await getSearchedJobs(e.target.value);
-    setSearchJobs(res?.job);
+    const value = e.target.value;
+    setLoading(true);
+    setSearchTerm(value);
+    setIsOpen(value.length > 0);
+    fetchSearchedJobs(value);
   }
 
   const handleSearch = () => {
@@ -256,53 +272,99 @@ const Home: NextPage = () => {
           <div className="container flex justify-between mx-auto">
             <div className="w-full md:w-2/4 p-5">
               <div className="w-full flex flex-col justify-between items-center gap-5">
-                <h1 className="text-5xl font-semibold my-5">Find A <span className="text-primary">Job</span> That <span className="text-primary">Matches</span> Your Passion</h1>
-                <h3 className="text-wrap">Hand-picked opportunities to work from home, remotely, freelance, full-time, part-time, contract and internships.</h3>
-                <div className="h-12 flex items-center w-full relative">
-                  <Input
-                    className="px-10 h-full text-[16px] bg-white rounded-r-none border-none focus-visible:ring-transparent"
-                    type="text"
-                    placeholder="Search by job title"
-                    value={searchTerm}
-                    onChange={handleInputChange}
-                    aria-label="Search by job title"
-                  />
+                <motion.h1
+                  initial={{ opacity: 0, x: -50 }}
+                  whileInView={{ opacity: 1, x: 0 }}
+                  transition={{ duration: 1, ease: "easeOut" }}
+                  viewport={{ once: true }}
+                  className="text-5xl font-semibold my-5"
+                >
+                  Find A <span className="text-primary">Job</span> That <span className="text-primary">Matches</span> Your Passion
+                </motion.h1>
+                <motion.h3
+                  initial={{ opacity: 0, x: -50 }}
+                  whileInView={{ opacity: 1, x: 0 }}
+                  transition={{ duration: 1, ease: "easeOut", delay: 0.3 }}
+                  viewport={{ once: true }}
+                  className="text-wrap"
+                >
+                  Hand-picked opportunities to work from home, remotely, freelance, full-time, part-time, contract and internships.
+                </motion.h3>
+                <motion.div
+                  initial={{ opacity: 0, x: -50 }}
+                  whileInView={{ opacity: 1, x: 0 }}
+                  transition={{ duration: 1, ease: "easeOut", delay: 0.6 }}
+                  viewport={{ once: true }}
+                  className="h-12 flex items-center w-full shadow-md relative"
+                >
+                  <div className="h-full w-full relative">
+                    <Input
+                      className="px-10 h-full text-[16px] bg-white rounded-r-none border-none focus-visible:ring-transparent"
+                      type="text"
+                      placeholder="Search by job title"
+                      value={searchTerm}
+                      onChange={handleInputChange}
+                      aria-label="Search by job title"
+                    />
+                    {isOpen && (
+                      <div className="absolute top-12 z-10 w-full bg-white border border-gray-200 rounded-b-md shadow-lg max-h-60 overflow-y-auto transition-all duration-300">
+                        {loading ?
+                          (<div className="px-6 py-2 border-b border-gray-200 flex justify-center items-center">
+                            <Loader2 className='mr-2 h-4 w-4 animate-spin' />
+                          </div>)
+                          :
+                          (searchJobs.length > 0
+                            ?
+                            (searchJobs?.map((job: Job, index) => (
+                              <div
+                                key={index}
+                                className="px-6 py-2 hover:bg-gray-100 cursor-pointer border-b border-gray-200 group"
+                                onClick={() => {
+                                  setSearchTerm(`${job?.jobTitle}`)
+                                  setIsOpen(false)
+                                }}
+                              >
+                                <Link
+                                  href={`/job-details/${job?._id}`}
+                                  className="relative"
+                                >
+                                  <div>
+                                    <h1 className="text-[16px] font-semibold">{job?.jobTitle}</h1>
+                                    <p className="text-sm text-gray-500 line-clamp-1">{job?.jobDescription}</p>
+                                  </div>
+                                  <MoveRight className="opacity-0 group-hover:opacity-100 group-hover:translate-x-3 absolute right-0 top-1 h-5 text-primary transition duration-300" />
+                                </Link>
+                              </div>
+                            )))
+                            :
+                            (
+                              <div className="px-6 py-2 border-b border-gray-200">
+                                <h1 className="text-[16px] text-center">No Results Found.</h1>
+                              </div>
+                            ))
+                        }
+                      </div>
+                    )}
+                  </div>
                   <Search className="absolute inset-y-2 top-3 left-2 text-gray-500 pointer-events-none" />
                   <Button className="h-full rounded-l-none" onClick={handleSearch}>Search</Button>
-                  {isOpen && (
-                    <div className="absolute top-12 z-10 w-[84%] bg-white border border-gray-200 rounded-b-md shadow-lg max-h-60 overflow-y-auto">
-                      {searchJobs?.map((job: Job, index) => (
-                        <div
-                          key={index}
-                          className="px-6 py-2 hover:bg-gray-100 cursor-pointer border-b border-gray-200 group"
-                          onClick={() => {
-                            setSearchTerm(`${job?.jobTitle}`)
-                            setIsOpen(false)
-                          }}
-                        >
-                          <Link
-                            href={`/job-details/${job?._id}`}
-                            className="relative"
-                          >
-                            <div>
-                              <h1 className="text-[16px] font-semibold">{job?.jobTitle}</h1>
-                              <p className="text-sm text-gray-500 line-clamp-1">{job?.jobDescription}</p>
-                            </div>
-                            <MoveRight className="opacity-0 group-hover:opacity-100 group-hover:translate-x-3 absolute right-0 top-1 h-5 text-primary transition duration-300" />
-                          </Link>
-                        </div>
-                      ))}
-                    </div>
-                  )}
-                </div>
+                </motion.div>
               </div>
             </div>
-            <div className="w-2/4 hidden md:flex justify-center items-center">
-              <img className="w-[50%] max-w-xl" src="/job-pic.jpg" alt="job-pic" />
-            </div>
+            <motion.div
+              initial={{ opacity: 0, y: 50 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              transition={{ duration: 1, ease: "easeOut" }}
+              viewport={{ once: true }}
+              className="w-2/4 hidden md:flex justify-center items-center"
+            >
+              {/* <div className="w-2/4 hidden md:flex justify-center items-center"> */}
+              <img className="w-[50%] max-w-xl pointer-events-none" src="/job-pic.jpg" alt="job-pic" />
+              {/* </div> */}
+            </motion.div>
           </div>
         </section>
-        <section className="container mx-auto py-14">
+        {/* <section className="container mx-auto py-14">
           <h2 className="text-2xl md:text-3xl text-center font-bold mb-10">Popular Categories</h2>
           <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-4">
             {categories.map((category, index) => (
@@ -314,7 +376,7 @@ const Home: NextPage = () => {
               </div>
             ))}
           </div>
-        </section>
+        </section> */}
 
         <section className="container mx-auto py-10">
           <h2 className="text-2xl md:text-3xl text-center font-bold mb-10">All Popular Listed Jobs</h2>

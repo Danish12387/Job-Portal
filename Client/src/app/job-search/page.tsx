@@ -18,6 +18,11 @@ import { useRouter, useSearchParams } from 'next/navigation';
 import { ChangeEvent, FormEvent, useCallback, useEffect, useState } from 'react';
 import InfiniteScroll from 'react-infinite-scroll-component';
 
+interface searchInputsInterface {
+    location: string;
+    search: string;
+}
+
 export default function JobSearchPage() {
     const dispatch = useAppDispatch();
     const searchParams = useSearchParams();
@@ -122,11 +127,6 @@ export default function JobSearchPage() {
     const loadMoreJobs = () => {
         dispatch(incrementPage(page + 1));
     };
-
-    interface searchInputsInterface {
-        location: string;
-        search: string;
-    }
 
     const onChangeJobFilters = (name: string, value: string | string[] | searchInputsInterface | undefined) => {
         setJobFilters({

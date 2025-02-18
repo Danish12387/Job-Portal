@@ -99,7 +99,7 @@ const columns: ColumnDef<Job>[] = [
         },
         cell: ({ row }) => {
             const date = new Date(row.getValue("createdAt"))
-            return <div title={format(date, 'PPP')}>{formatDistanceToNow(date, { addSuffix: true })}</div>
+            return <div title={format(date, 'PPPpp')}>{format(date, 'PP')}</div>
         },
     },
     {
