@@ -12,5 +12,8 @@ router.route('/fetch-jobs').get(isAuthenticated, getAllJobs);
 router.route('/:id/details').get(isAuthenticated, getSingleJob);
 router.route('/searchedJobs').get(getSearchedJobs);
 router.route('/homeJobs').get(getJobs);
+router.route('/test').get((req, res) => {    
+    res.send("Hello, testing route");
+});
 
 export default router;
