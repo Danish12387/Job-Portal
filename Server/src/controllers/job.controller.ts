@@ -202,7 +202,7 @@ export const getSingleJob = async (req: Request, res: Response): Promise<any> =>
         const jobId = req.params.id;
         const job = await Job.findById(jobId).populate({ path: 'author', select: '-password' });
 
-        return res.status(200).json({
+        res.status(200).json({
             success: true,
             message: "Job fetched successfully",
             job: job,

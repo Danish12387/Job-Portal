@@ -11,7 +11,7 @@ interface UserState {
 }
 
 const initialState: UserState = {
-    API_END_POINT1: "http://localhost:8000/api/v1",
+    API_END_POINT1: "https://job-portal-server-two-phi.vercel.app/api/v1",
     isAuthenticated: false,
     loading: true,
     progress: 0,
