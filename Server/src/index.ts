@@ -24,9 +24,9 @@ const corsOptions = {
 }
 app.use(cors(corsOptions));
 
-app.get('/', (req, res) => {
+app.get('/', (_, res) => {
     res.status(200).json({
-        message: "Welcome to the API"
+        message: "Hello, Welcome to Job Portal API"
     })
 })
 
