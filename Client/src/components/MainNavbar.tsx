@@ -26,11 +26,13 @@ const MainNavbar = () => {
     useEffect(() => {
         let title: string = pageTitles[pathname as keyof typeof pageTitles] || 'Job Nexus';
 
-        if (params.get('create') === 'post') {
-            title = 'Create Post | Job Nexus';
+        if (pathname.startsWith('/feed')) {
+            if (params.get('create') === 'post') {
+                title = 'Create Post | Job Nexus';
+            }
         }
 
-        if (pathname.startsWith('/profile/')) {
+        if (pathname.startsWith('/profile')) {
             if (params.get('edit') === 'profile') {
                 title = 'Edit Profile | Job Nexus';
             } else if (params.get('edit') === 'about') {
@@ -46,7 +48,7 @@ const MainNavbar = () => {
             }
         }
 
-        if (pathname.startsWith('/job-details/')) {
+        if (pathname.startsWith('/job-details')) {
             title = 'Job Details | Job Nexus';
         }
 
