@@ -7,6 +7,7 @@ import cookieParser from "cookie-parser";
 import userRoutes from "./routes/user.route.js";
 import jobRoutes from "./routes/job.route.js";
 import postRoutes from "./routes/post.route.js";
+import { Job } from "./models/job.model.js";
 dotenv.config();
 const app = express();
 const PORT = process.env.PORT || 3000;
@@ -19,10 +20,21 @@ const corsOptions = {
     credentials: true
 };
 app.use(cors(corsOptions));
-app.get('/', (req, res) => {
-    res.status(200).json({
-        message: "Welcome to the API"
-    });
+app.get('/', async (req, res) => {
+    try {
+        const jobs = await Job.find().sort({ createdAt: -1 }).limit(6);
+        return res.status(200).json({
+            success: true,
+            message: "Jobs fetched successfully",
+            homeJobs: jobs
+        })
+    } catch (error) {
+        console.error(error);
+        return res.status(500).json({
+            success: false,
+            message: "Internal Server Error",
+        });
+    }
 });
 app.use("/api/v1/user", userRoutes);
 app.use("/api/v1/job", jobRoutes);
